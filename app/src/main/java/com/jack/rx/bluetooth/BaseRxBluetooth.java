@@ -3,12 +3,14 @@ package com.jack.rx.bluetooth;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import com.inuker.bluetooth.library.BluetoothClient;
 import com.inuker.bluetooth.library.connect.listener.BleConnectStatusListener;
 import com.inuker.bluetooth.library.connect.listener.BluetoothStateListener;
 import com.inuker.bluetooth.library.connect.options.BleConnectOptions;
 import com.inuker.bluetooth.library.connect.response.BleNotifyResponse;
+import com.inuker.bluetooth.library.model.BleGattProfile;
 import com.inuker.bluetooth.library.search.SearchRequest;
 import com.inuker.bluetooth.library.search.SearchResult;
 import com.inuker.bluetooth.library.search.response.SearchResponse;
@@ -261,11 +263,11 @@ public abstract class BaseRxBluetooth {
      * @return
      */
     @SuppressLint("DefaultLocale")
-    protected Observable<BluetoothStatus> connect(String mac, BleConnectOptions options) {
-        return Observable.<BluetoothStatus>create(emitter -> {
+    protected Observable<Pair<BluetoothStatus, BleGattProfile>> connect(String mac, BleConnectOptions options) {
+        return Observable.<Pair<BluetoothStatus, BleGattProfile>>create(emitter -> {
             m_client.connect(mac, options, (code, data) -> {
                 if (code == REQUEST_SUCCESS) {
-                    emitter.onNext(BluetoothStatus.CONNECTED);
+                    emitter.onNext(Pair.create(BluetoothStatus.CONNECTED, data));
                     emitter.onComplete();
                 } else {
                     emitter.onError(new BluetoothException(String.format("connect code = %d", code)));
