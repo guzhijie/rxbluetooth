@@ -141,6 +141,10 @@ public abstract class BaseRxBluetooth {
 
     }
 
+    public BluetoothStatus getConnectStatus(String mac) {
+        return BluetoothStatus.valueOf(m_client.getConnectStatus(mac));
+    }
+
     public Observable<byte[]> read(String mac, UUID serviceUUID, UUID characterUUID) {
         return Observable.create(emitter -> {
             m_client.read(mac, serviceUUID, characterUUID, (code, data) -> {
@@ -263,7 +267,7 @@ public abstract class BaseRxBluetooth {
      * @return
      */
     @SuppressLint("DefaultLocale")
-    protected Observable<Pair<BluetoothStatus, BleGattProfile>> connect(String mac, BleConnectOptions options) {
+    protected Observable<Pair<BluetoothStatus, BleGattProfile>> connect0(String mac, BleConnectOptions options) {
         return Observable.<Pair<BluetoothStatus, BleGattProfile>>create(emitter -> {
             m_client.connect(mac, options, (code, data) -> {
                 if (code == REQUEST_SUCCESS) {
@@ -282,7 +286,7 @@ public abstract class BaseRxBluetooth {
      * @param mac
      * @return
      */
-    protected Observable<BluetoothStatus> disconnect(String mac) {
+    protected Observable<BluetoothStatus> disconnect0(String mac) {
         final BleConnectStatusListener[] listeners = new BleConnectStatusListener[1];
         return Observable.<BluetoothStatus>create(emitter -> {
             listeners[0] = new BleConnectStatusListener() {
@@ -290,6 +294,7 @@ public abstract class BaseRxBluetooth {
                 public void onConnectStatusChanged(final String address, final int status) {
                     if (address.equals(mac) && !emitter.isDisposed()) {
                         emitter.onNext(BluetoothStatus.valueOf(status));
+                        emitter.onComplete();
                     }
                 }
             };
@@ -298,9 +303,7 @@ public abstract class BaseRxBluetooth {
         }).doFinally(() -> m_client.unregisterConnectStatusListener(mac, listeners[0]));
     }
 
-
     private void stopSearch() {
         m_client.stopSearch();
     }
-
 }
