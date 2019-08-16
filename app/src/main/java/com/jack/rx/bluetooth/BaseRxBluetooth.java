@@ -163,8 +163,14 @@ public abstract class BaseRxBluetooth {
     public Observable<Boolean> write(String mac, UUID serviceUUID, UUID characterUUID, byte[] value) {
         return Observable.create(emitter -> {
             m_client.write(mac, serviceUUID, characterUUID, value, code -> {
-                emitter.onNext(code == REQUEST_SUCCESS);
-                emitter.onComplete();
+                if (code == REQUEST_SUCCESS) {
+                    emitter.onNext(true);
+                    emitter.onComplete();
+                } else {
+                    @SuppressLint("DefaultLocale")
+                    String msg = String.format("write %s @ %s : %s error = %d", mac, serviceUUID.toString(), characterUUID.toString(), code);
+                    emitter.onError(new BluetoothException(msg));
+                }
             });
         });
     }
@@ -199,7 +205,7 @@ public abstract class BaseRxBluetooth {
                     emitter.onComplete();
                 } else {
                     @SuppressLint("DefaultLocale")
-                    String msg = String.format("read %s @ %s : %s error = %d", mac, serviceUUID.toString(), characterUUID.toString(), code);
+                    String msg = String.format("readDescriptor %s @ %s : %s error = %d", mac, serviceUUID.toString(), characterUUID.toString(), code);
                     emitter.onError(new BluetoothException(msg));
                 }
             });
@@ -209,8 +215,15 @@ public abstract class BaseRxBluetooth {
     public Observable<Boolean> writeDescriptor(String mac, UUID serviceUUID, UUID characterUUID, UUID descriptorUUID, byte[] value) {
         return Observable.create(emitter -> {
             m_client.writeDescriptor(mac, serviceUUID, characterUUID, descriptorUUID, value, code -> {
-                emitter.onNext(code == REQUEST_SUCCESS);
-                emitter.onComplete();
+                if (code == REQUEST_SUCCESS) {
+                    emitter.onNext(true);
+                    emitter.onComplete();
+                } else {
+                    @SuppressLint("DefaultLocale")
+                    String msg = String.format("writeDescriptor %s @ %s : %s error = %d", mac, serviceUUID.toString(), characterUUID.toString(), code);
+                    emitter.onError(new BluetoothException(msg));
+                }
+
             });
         });
     }

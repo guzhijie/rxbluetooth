@@ -1,7 +1,10 @@
 package com.jack.rx.bluetooth;
 
 
+import java.util.UUID;
+
 import io.reactivex.Observable;
+import io.reactivex.ObservableTransformer;
 
 /**
  * 描述:
@@ -17,4 +20,9 @@ public abstract class BluetoothHolder {
     }
 
     public abstract Observable<Float> readPower();
+
+    public abstract ObservableTransformer<byte[], Object> notifyTransformer(UUID serviceUUID, UUID characterUUID);
+
+    public abstract ObservableTransformer<byte[], ?> readTransformer(UUID serviceUUID, UUID characterUUID);
+
 }

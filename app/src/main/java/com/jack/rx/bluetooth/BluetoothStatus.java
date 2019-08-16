@@ -15,6 +15,7 @@ import com.inuker.bluetooth.library.Constants;
  */
 public enum BluetoothStatus {
 
+    //蓝牙设备状态
     UNKNOWN(new int[]{Constants.STATUS_UNKNOWN}),
     CONNECTED(new int[]{Constants.STATUS_DEVICE_CONNECTED, Constants.STATUS_CONNECTED}),
     CONNECTING(new int[]{Constants.STATUS_DEVICE_CONNECTING}),

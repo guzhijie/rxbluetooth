@@ -1,5 +1,7 @@
 package com.jack.rx.bluetooth;
 
+import android.annotation.SuppressLint;
+import android.app.Application;
 import android.content.Context;
 import android.util.Pair;
 
@@ -7,18 +9,11 @@ import com.inuker.bluetooth.library.connect.listener.BleConnectStatusListener;
 import com.inuker.bluetooth.library.connect.options.BleConnectOptions;
 
 import java.util.Collection;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableOperator;
-import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiFunction;
-import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 
 /**
@@ -29,16 +24,19 @@ import io.reactivex.subjects.PublishSubject;
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public final class RxBluetooth extends BaseRxBluetooth {
+    private static RxBluetooth m_rxBluetooth;
     private final PublishSubject<Pair<String, BluetoothStatus>> m_bluetoothStatusBus = PublishSubject.create();
     private final PublishSubject<String> m_stopReconnect = PublishSubject.create();
     private final Map<String, BluetoothHolder> m_bluetoothMap = new ConcurrentHashMap<>(8);
     private final BleConnectStatusListener m_connectStatusListener = new BleConnectStatusListener() {
+        @SuppressLint("CheckResult")
         @Override
         public void onConnectStatusChanged(final String mac, final int status) {
             final BluetoothStatus bluetoothStatus = BluetoothStatus.valueOf(status);
             if (BluetoothStatus.CONNECTED != bluetoothStatus) {
                 BluetoothHolder holder = m_bluetoothMap.get(mac);
                 if (null != holder) {
+                    //noinspection SingleStatementInBlock
                     connectByMac(mac, (mac1, bleGattProfile) -> Observable.just(holder))
                             .takeUntil(m_stopReconnect.filter(s -> s.equals(mac)))
                             .doOnSubscribe(disposable -> m_bluetoothStatusBus.onNext(Pair.create(mac, BluetoothStatus.CONNECTING)))
@@ -55,8 +53,19 @@ public final class RxBluetooth extends BaseRxBluetooth {
         }
     };
 
-    public RxBluetooth(final Context client) {
+    private RxBluetooth(final Context client) {
         super(client);
+    }
+
+    public static void init(Application application) {
+        m_rxBluetooth = new RxBluetooth(application);
+    }
+
+    public static RxBluetooth getInstance() {
+        if (null == m_rxBluetooth) {
+            throw new NullPointerException("init(Application application) is not called.");
+        }
+        return m_rxBluetooth;
     }
 
     public Collection<BluetoothHolder> getConnectedBluetoothStatus() {
