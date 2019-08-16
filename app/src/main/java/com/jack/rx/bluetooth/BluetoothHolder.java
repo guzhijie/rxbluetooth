@@ -12,17 +12,12 @@ import io.reactivex.ObservableTransformer;
  * @author :jack.gu  Email: guzhijie1981@163.com
  * @since : 2019/8/7
  */
-public abstract class BluetoothHolder {
-    public final String mac;
+public interface BluetoothHolder {
+    String getMac();
 
-    protected BluetoothHolder(final String mac) {
-        this.mac = mac;
-    }
+    Observable<Float> readPower();
 
-    public abstract Observable<Float> readPower();
+    ObservableTransformer<byte[], Object> notifyTransformer(UUID serviceUUID, UUID characterUUID);
 
-    public abstract ObservableTransformer<byte[], Object> notifyTransformer(UUID serviceUUID, UUID characterUUID);
-
-    public abstract ObservableTransformer<byte[], ?> readTransformer(UUID serviceUUID, UUID characterUUID);
-
+    ObservableTransformer<byte[], ?> readTransformer(UUID serviceUUID, UUID characterUUID);
 }

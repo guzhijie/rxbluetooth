@@ -12,5 +12,5 @@ import io.reactivex.Observable;
  * @since : 2019/8/7
  */
 public interface BluetoothHolderFactory {
-    Observable<BluetoothHolder> create(String mac, BleGattProfile bleGattProfile);
+    Observable<? extends BluetoothHolder> create(String mac, BleGattProfile bleGattProfile);
 }

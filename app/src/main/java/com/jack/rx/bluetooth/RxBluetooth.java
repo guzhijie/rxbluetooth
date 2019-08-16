@@ -74,16 +74,16 @@ public final class RxBluetooth extends BaseRxBluetooth {
 
     public Observable<BluetoothInfo> bluetoothStatusObservable() {
         return Observable.fromIterable(getConnectedBluetoothStatus())
-                .concatMap(bluetoothHolder -> m_bluetoothStatusBus.filter(pair -> pair.first.equals(bluetoothHolder.mac))
+                .concatMap(bluetoothHolder -> m_bluetoothStatusBus.filter(pair -> pair.first.equals(bluetoothHolder.getMac()))
                         .map(statusPair -> statusPair.second)
-                        .startWith(getConnectStatus(bluetoothHolder.mac))
+                        .startWith(getConnectStatus(bluetoothHolder.getMac()))
                         .join(bluetoothHolder.readPower(),
                                 bluetoothStatus -> Observable.empty(),
                                 power -> Observable.empty(),
                                 (bluetoothStatus, power) -> new BluetoothInfo.Builder()
                                         .setBluetoothStatus(bluetoothStatus)
                                         .setPower(power))
-                        .join(readRssi(bluetoothHolder.mac),
+                        .join(readRssi(bluetoothHolder.getMac()),
                                 builder -> Observable.empty(),
                                 rssi -> Observable.empty(),
                                 (builder, rssi) -> builder.setRssi(rssi).build()));
