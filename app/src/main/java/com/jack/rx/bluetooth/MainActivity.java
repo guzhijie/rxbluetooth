@@ -7,6 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import com.jack.test.SensorBluetoothHolderFactory;
 import com.jack.test.SensorBluetoothHolder;
 
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
+
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class MainActivity extends AppCompatActivity {
 
@@ -19,8 +22,9 @@ public class MainActivity extends AppCompatActivity {
         RxBluetooth.getInstance()
                 .connect(mac, new SensorBluetoothHolderFactory())
                 .map(bluetoothHolder -> (SensorBluetoothHolder) bluetoothHolder)
+                .map(SensorBluetoothHolder::sensorObservable)
                 .subscribe(bluetoothHolder -> {
-                    bluetoothHolder.sensorObservable()
+
                 });
     }
 }

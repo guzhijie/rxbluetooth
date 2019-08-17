@@ -26,17 +26,16 @@ import static com.jack.test.BluetoothConstants.UUID_FFF2;
  * @author :jack.gu  Email: guzhijie1981@163.com
  * @since : 2019/8/13
  */
-public final class JS100BluetoothHolder extends SensorBluetoothHolder<JS100SensorData> {
+public final class JS100BluetoothHolder extends SensorBluetoothHolder {
     public JS100BluetoothHolder(final String mac) {
         super(mac, RxBluetooth.getInstance());
     }
 
     @Override
-    public Observable<JS100SensorData> sensorObservable() {
+    public Observable<Object> sensorObservable() {
         return rxBluetooth.write(mac, UUID_FFF0, UUID_FFF1, sensorParameter())
                 .concatMap(aBoolean -> rxBluetooth.notify(mac, UUID_FFF0, UUID_FFF2))
-                .compose(notifyTransformer(UUID_FFF0, UUID_FFF2))
-                .map(o -> (JS100SensorData) o);
+                .compose(notifyTransformer(UUID_FFF0, UUID_FFF2));
     }
 
     @Override
