@@ -48,7 +48,7 @@ public final class ZC1000BluetoothHolder extends SensorBluetoothHolder {
     }
 
     @Override
-    public ObservableTransformer<byte[], ?> readTransformer(UUID serviceUUID, UUID characterUUID) {
+    public ObservableTransformer<byte[], Object> readTransformer(UUID serviceUUID, UUID characterUUID) {
         return upstream -> upstream.map(bytes -> bytes);
     }
 

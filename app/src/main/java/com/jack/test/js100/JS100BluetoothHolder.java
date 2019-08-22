@@ -83,7 +83,7 @@ public final class JS100BluetoothHolder extends SensorBluetoothHolder {
     }
 
     @Override
-    public ObservableTransformer<byte[], ?> readTransformer(UUID serviceUUID, UUID characterUUID) {
+    public ObservableTransformer<byte[], Object> readTransformer(UUID serviceUUID, UUID characterUUID) {
         //UUID_FFF0, UUID_FFF1
         if (UUID_FFF0.equals(serviceUUID) && UUID_FFF1.equals(characterUUID)) {
             return upstream -> upstream.map(data -> {
