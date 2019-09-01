@@ -41,7 +41,7 @@ public final class ZC1000BluetoothHolder extends SensorBluetoothHolder {
     public ObservableTransformer<byte[], Object> notifyTransformer(UUID serviceUUID, UUID characterUUID) {
         // UUID_FFE0, UUID_FFE4
         if (UUID_FFE0.equals(serviceUUID) && UUID_FFE4.equals(characterUUID)) {
-            return upstream -> upstream.map(String::new);
+            return upstream -> upstream.map(ZC1000SensorData::new);
         } else {
             return upstream -> upstream.map(bytes -> bytes);
         }

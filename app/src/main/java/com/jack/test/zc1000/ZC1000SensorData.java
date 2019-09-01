@@ -7,4 +7,6 @@ package com.jack.test.zc1000;
  * @since : 2019/8/16
  */
 public class ZC1000SensorData {
+    public ZC1000SensorData(final byte[] bytes) {
+    }
 }
