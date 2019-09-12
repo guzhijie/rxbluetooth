@@ -26,7 +26,7 @@ import static com.inuker.bluetooth.library.Constants.REQUEST_SUCCESS;
 /**
  * 描述:
  *
- * @author :jack.gu  Email: guzhijie1981@163.com
+ * @author :jack.gu
  * @since : 2019/7/6
  */
 public abstract class BaseRxBluetooth {

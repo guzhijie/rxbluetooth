@@ -5,7 +5,7 @@ import com.inuker.bluetooth.library.Constants;
 /**
  * 描述:
  *
- * @author :jack.gu  Email: guzhijie1981@163.com
+ * @author :jack.gu
  * @see Constants.STATUS_UNKNOWN
  * @see Constants.STATUS_DEVICE_CONNECTED
  * @see Constants.STATUS_DEVICE_CONNECTING

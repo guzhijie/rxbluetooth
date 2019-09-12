@@ -3,7 +3,7 @@ package com.jack.rx.bluetooth;
 /**
  * 描述:
  *
- * @author :jack.gu  Email: guzhijie1981@163.com
+ * @author :jack.gu
  * @since : 2019/8/7
  */
 public final class BluetoothInfo {
