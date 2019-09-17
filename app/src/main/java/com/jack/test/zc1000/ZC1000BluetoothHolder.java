@@ -19,13 +19,13 @@ import static com.jack.test.BluetoothConstants.UUID_FFE4;
  * @author :jack.gu
  * @since : 2019/8/13
  */
-public final class ZC1000BluetoothHolder extends SensorBluetoothHolder {
+public final class ZC1000BluetoothHolder extends SensorBluetoothHolder<ZC1000SensorData> {
     public ZC1000BluetoothHolder(final String mac) {
         super(mac, RxBluetooth.getInstance());
     }
 
     @Override
-    public Observable<Object> sensorObservable() {
+    public Observable<ZC1000SensorData> sensorObservable() {
         return rxBluetooth.notify(mac, UUID_FFE0, UUID_FFE4)
                 .compose(notifyTransformer(UUID_FFE0, UUID_FFE4));
     }
@@ -38,18 +38,19 @@ public final class ZC1000BluetoothHolder extends SensorBluetoothHolder {
     }
 
     @Override
-    public ObservableTransformer<byte[], Object> notifyTransformer(UUID serviceUUID, UUID characterUUID) {
+    public <T> ObservableTransformer<byte[], T> notifyTransformer(UUID serviceUUID, UUID characterUUID) {
         // UUID_FFE0, UUID_FFE4
         if (UUID_FFE0.equals(serviceUUID) && UUID_FFE4.equals(characterUUID)) {
-            return upstream -> upstream.map(ZC1000SensorData::new);
+            //noinspection unchecked
+            return upstream -> upstream.map(bytes -> (T) new ZC1000SensorData(bytes));
         } else {
-            return upstream -> upstream.map(bytes -> bytes);
+            return upstream -> upstream.map(bytes -> (T) bytes);
         }
     }
 
     @Override
-    public ObservableTransformer<byte[], Object> readTransformer(UUID serviceUUID, UUID characterUUID) {
-        return upstream -> upstream.map(bytes -> bytes);
+    public <T> ObservableTransformer<byte[], T> readTransformer(UUID serviceUUID, UUID characterUUID) {
+        return upstream -> upstream.map(bytes -> (T) bytes);
     }
 
 }

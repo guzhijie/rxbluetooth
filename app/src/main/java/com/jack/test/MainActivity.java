@@ -24,8 +24,8 @@ public class MainActivity extends AppCompatActivity {
         RxBluetooth.getInstance()
                 .connect(mac, new SensorBluetoothHolderFactory())
                 .map(bluetoothHolder -> (SensorBluetoothHolder) bluetoothHolder)
-                .map(SensorBluetoothHolder::sensorObservable)
-                .subscribe(bluetoothHolder -> {
+                .concatMap(SensorBluetoothHolder::sensorObservable)
+                .subscribe(o -> {
 
                 });
     }

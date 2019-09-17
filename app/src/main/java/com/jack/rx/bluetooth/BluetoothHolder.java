@@ -17,7 +17,7 @@ public interface BluetoothHolder {
 
     Observable<Float> readPower();
 
-    ObservableTransformer<byte[], Object> notifyTransformer(UUID serviceUUID, UUID characterUUID);
+    <T> ObservableTransformer<byte[], T> notifyTransformer(UUID serviceUUID, UUID characterUUID);
 
-    ObservableTransformer<byte[], Object> readTransformer(UUID serviceUUID, UUID characterUUID);
+    <T> ObservableTransformer<byte[], T> readTransformer(UUID serviceUUID, UUID characterUUID);
 }
