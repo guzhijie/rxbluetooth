@@ -11,7 +11,7 @@ import io.reactivex.Observable;
  * @author :jack.gu
  * @since : 2019/8/16
  */
-public abstract class SensorBluetoothHolder<T> implements BluetoothHolder {
+public abstract class SensorBluetoothHolder<T extends SensorData<T>> implements BluetoothHolder {
     protected final String mac;
     protected final RxBluetooth rxBluetooth;
 
