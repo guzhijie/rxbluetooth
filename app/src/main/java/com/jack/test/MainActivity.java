@@ -7,16 +7,10 @@ import android.util.Log;
 
 import com.jack.rx.bluetooth.R;
 import com.jack.rx.bluetooth.RxBluetooth;
-import com.jack.test.SensorBluetoothHolderFactory;
-import com.jack.test.SensorBluetoothHolder;
 import com.jack.test.js100.JS100SensorData;
 import com.jack.test.zc1000.ZC1000SensorData;
 
 import java.lang.reflect.Type;
-import java.util.logging.Logger;
-
-import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class MainActivity extends AppCompatActivity {
@@ -39,14 +33,13 @@ public class MainActivity extends AppCompatActivity {
                     Log.e(TAG, temperature);
                     Type type = sensorData.getType();
                     if (type instanceof JS100SensorData) {
+                        JS100SensorData js100SensorData = (JS100SensorData) sensorData;
+                        Float vibrate = js100SensorData.getVibrate();
                     } else if (type instanceof ZC1000SensorData) {
+                        ZC1000SensorData zc1000SensorData = (ZC1000SensorData) sensorData;
+                        String rfid = zc1000SensorData.getRFID();
                     }
                 });
 
-    }
-
-    public static void main(String[] argv) {
-        SensorData<JS100SensorData> sensorData = new JS100SensorData();
-        System.out.println(sensorData.getType() instanceof Class);
     }
 }
