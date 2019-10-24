@@ -63,7 +63,6 @@ public final class JS100Param {
         //采样点数
         bytes[5] = (byte) ((m_point.point >> 8) & 0xFF);
         bytes[6] = (byte) (m_point.point & 0xFF);
-
         //只有温度,才有发射率系数
         bytes[7] = (byte) ((m_factor >> 8) & 0xFF);
         bytes[8] = (byte) (m_factor & 0xFF);

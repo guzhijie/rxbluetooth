@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">rx_bluetooth</string>
+    <string name="search_ble">搜索设备</string>
 </resources>
