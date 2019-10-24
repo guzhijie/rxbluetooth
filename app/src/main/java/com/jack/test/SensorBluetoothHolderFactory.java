@@ -19,12 +19,12 @@ import io.reactivex.Observable;
 public final class SensorBluetoothHolderFactory implements BluetoothHolderFactory, BluetoothConstants {
     private final static String TAG = SensorBluetoothHolderFactory.class.getName();
 
-    @SuppressWarnings("MalformedFormatString")
     @Override
     public Observable<SensorBluetoothHolder> create(final String mac, final BleGattProfile bleGattProfile) {
         if (bleGattProfile.containsCharacter(UUID_180A, UUID_2A29)) {
             return RxBluetooth.getInstance().read(mac, UUID_180A, UUID_2A29).map(bytes -> {
                 String name = new String(bytes).trim();
+                //noinspection MalformedFormatString
                 Log.e(TAG, String.format("当前蓝牙设备制造商名字", name));
                 return new JS100BluetoothHolder(mac);
             });

@@ -1,24 +1,22 @@
 package com.jack.test.js100;
 
-import com.jack.rx.bluetooth.BluetoothException;
-import com.jack.rx.bluetooth.RxBluetooth;
-import com.jack.test.SensorBluetoothHolder;
+        import com.jack.rx.bluetooth.BluetoothException;
+        import com.jack.rx.bluetooth.RxBluetooth;
+        import com.jack.test.SensorBluetoothHolder;
 
-import java.util.Arrays;
-import java.util.UUID;
+        import java.util.Arrays;
+        import java.util.UUID;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableOperator;
-import io.reactivex.ObservableTransformer;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
+        import io.reactivex.Observable;
+        import io.reactivex.ObservableOperator;
+        import io.reactivex.ObservableTransformer;
 
-import static com.jack.test.BluetoothConstants.BATTERY_SERVICE_UUID;
-import static com.jack.test.BluetoothConstants.READ_DATA_MIN_LEN;
-import static com.jack.test.BluetoothConstants.UUID_2A19;
-import static com.jack.test.BluetoothConstants.UUID_FFF0;
-import static com.jack.test.BluetoothConstants.UUID_FFF1;
-import static com.jack.test.BluetoothConstants.UUID_FFF2;
+        import static com.jack.test.BluetoothConstants.BATTERY_SERVICE_UUID;
+        import static com.jack.test.BluetoothConstants.READ_DATA_MIN_LEN;
+        import static com.jack.test.BluetoothConstants.UUID_2A19;
+        import static com.jack.test.BluetoothConstants.UUID_FFF0;
+        import static com.jack.test.BluetoothConstants.UUID_FFF1;
+        import static com.jack.test.BluetoothConstants.UUID_FFF2;
 
 /**
  * 描述:
@@ -26,16 +24,9 @@ import static com.jack.test.BluetoothConstants.UUID_FFF2;
  * @author :jack.gu
  * @since : 2019/8/13
  */
-public final class JS100BluetoothHolder extends SensorBluetoothHolder<JS100SensorData> {
+public final class JS100BluetoothHolder extends SensorBluetoothHolder<JS100SensorData, JS100Param> {
     public JS100BluetoothHolder(final String mac) {
         super(mac, RxBluetooth.getInstance());
-    }
-
-    @Override
-    public Observable<JS100SensorData> sensorObservable() {
-        return rxBluetooth.write(mac, UUID_FFF0, UUID_FFF1, sensorParameter())
-                .concatMap(aBoolean -> rxBluetooth.notify(mac, UUID_FFF0, UUID_FFF2))
-                .compose(notifyTransformer(UUID_FFF0, UUID_FFF2));
     }
 
     @Override
@@ -49,36 +40,8 @@ public final class JS100BluetoothHolder extends SensorBluetoothHolder<JS100Senso
     public <T> ObservableTransformer<byte[], T> notifyTransformer(UUID serviceUUID, UUID characterUUID) {
         //UUID_FFF0, UUID_FFF1
         if (UUID_FFF0.equals(serviceUUID) && UUID_FFF2.equals(characterUUID)) {
-            return upstream -> upstream.lift((ObservableOperator<T, byte[]>) observer -> {
-                return new Observer<byte[]>() {
-                    private Disposable m_disposable;
-                    private JS100SensorData m_js100SensorData = new JS100SensorData();
-
-                    @Override
-                    public void onSubscribe(final Disposable d) {
-                        m_disposable = d;
-                        observer.onSubscribe(d);
-                    }
-
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    public void onNext(final byte[] bytes) {
-                        observer.onNext((T) m_js100SensorData);
-                    }
-
-                    @Override
-                    public void onError(final Throwable e) {
-                        observer.onError(e);
-                        m_disposable.dispose();
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        observer.onComplete();
-                        m_disposable.dispose();
-                    }
-                };
-            });
+            //noinspection unchecked
+            return upstream -> upstream.lift((ObservableOperator<T, byte[]>) new JS100SensorData.Operator(this));
         } else {
             return upstream -> upstream.map(bytes -> (T) bytes);
         }
@@ -110,7 +73,11 @@ public final class JS100BluetoothHolder extends SensorBluetoothHolder<JS100Senso
         }
     }
 
-    private byte[] sensorParameter() {
-        return null;
+    @Override
+    public Observable<JS100SensorData> sensorObservable(JS100Param param) {
+        return rxBluetooth.write(mac, UUID_FFF0, UUID_FFF1, param.toByteArray())
+                .concatMap(aBoolean -> rxBluetooth.notify(mac, UUID_FFF0, UUID_FFF2))
+                .compose(notifyTransformer(UUID_FFF0, UUID_FFF2));
+
     }
 }

@@ -9,16 +9,14 @@ import java.lang.reflect.Type;
  * @author :jack.gu
  * @since : 2019/10/13 0013
  */
-public abstract class SensorData<E extends SensorData<E>> {
-    public abstract <T> T getTemperature();
+public abstract class SensorData<E extends SensorData<E, T, V, S, D>, T, V, S, D> {
+    public abstract T getTemperature();
 
-    public abstract <V> V getVibrate();
+    public abstract V getVibrate();
+
+    public abstract S getSpeed();
+
+    public abstract D getDistance();
 
     public abstract String getRFID();
-
-    public Type getType() {
-        ParameterizedType parameterizedType = (ParameterizedType) this.getClass().getGenericSuperclass();
-        assert parameterizedType != null;
-        return parameterizedType.getActualTypeArguments()[0];
-    }
 }

@@ -19,15 +19,9 @@ import static com.jack.test.BluetoothConstants.UUID_FFE4;
  * @author :jack.gu
  * @since : 2019/8/13
  */
-public final class ZC1000BluetoothHolder extends SensorBluetoothHolder<ZC1000SensorData> {
+public final class ZC1000BluetoothHolder extends SensorBluetoothHolder<ZC1000SensorData, Void> {
     public ZC1000BluetoothHolder(final String mac) {
         super(mac, RxBluetooth.getInstance());
-    }
-
-    @Override
-    public Observable<ZC1000SensorData> sensorObservable() {
-        return rxBluetooth.notify(mac, UUID_FFE0, UUID_FFE4)
-                .compose(notifyTransformer(UUID_FFE0, UUID_FFE4));
     }
 
     @Override
@@ -53,4 +47,9 @@ public final class ZC1000BluetoothHolder extends SensorBluetoothHolder<ZC1000Sen
         return upstream -> upstream.map(bytes -> (T) bytes);
     }
 
+    @Override
+    public Observable<ZC1000SensorData> sensorObservable(Void param) {
+        return rxBluetooth.notify(mac, UUID_FFE0, UUID_FFE4)
+                .compose(notifyTransformer(UUID_FFE0, UUID_FFE4));
+    }
 }
