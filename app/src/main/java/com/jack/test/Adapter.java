@@ -3,6 +3,7 @@ package com.jack.test;
 import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,8 @@ import butterknife.ButterKnife;
  * @since : 2019/10/25 0025
  */
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
-    public final List<SearchResult> m_searchResults = new ArrayList<>();
+    private final String TAG = Adapter.class.getName();
+    private final List<SearchResult> m_searchResults = new ArrayList<>();
     private OnItemClickListener m_onItemClickListener;
     private OnItemLongClickListener m_onItemLongClickListener;
 
@@ -43,12 +45,18 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         String addr = searchResult.device.getAddress();
         String name = searchResult.device.getName();
         int rssi = searchResult.rssi;
-        textView.setText(String.format("蓝牙地址:%s, 名字:%s, 信号强度:%d", addr, name, rssi));
+        textView.setText(String.format("地址:%s, 名字:%s, 强度:%d", addr, name, rssi));
     }
 
     @Override
     public int getItemCount() {
         return m_searchResults.size();
+    }
+
+    public Adapter addItem(int pos, SearchResult searchResult) {
+        this.m_searchResults.add(pos, searchResult);
+        Log.e(TAG, "当前队列长度:" + m_searchResults.size());
+        return this;
     }
 
     public Adapter setOnItemClickListener(OnItemClickListener l) {

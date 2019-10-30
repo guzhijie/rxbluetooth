@@ -3,8 +3,11 @@ package com.jack.test;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.inuker.bluetooth.library.search.SearchRequest;
 import com.inuker.bluetooth.library.search.SearchResult;
@@ -18,13 +21,20 @@ import com.jack.test.js100.JS100SampleType;
 import com.jack.test.js100.JS100SensorData;
 import com.jack.test.zc1000.ZC1000BluetoothHolder;
 import com.jack.test.zc1000.ZC1000SensorData;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class MainActivity extends AppCompatActivity {
@@ -54,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                                     .setType(JS100SampleType.Temperature_Vibrate)
                                     .setFrequency(JS100SampleFrequency.Freq_1kHz)
                                     .setFactor(100)
-                                    .setPoint(JS100SamplePoint.Point_512)                            );
+                                    .setPoint(JS100SamplePoint.Point_512));
                         } else {
                             ZC1000BluetoothHolder zc1000BluetoothHolder = (ZC1000BluetoothHolder) sensorBluetoothHolder;
                             return zc1000BluetoothHolder.sensorObservable(null);
@@ -75,16 +85,28 @@ public class MainActivity extends AppCompatActivity {
                     });
         });
         bleList.setAdapter(adapter);
-        searchBle.setOnClickListener(v -> RxBluetooth.getInstance()
-                .search(new SearchRequest.Builder()
-                        .searchBluetoothLeDevice(3000, 3)
-                        .searchBluetoothClassicDevice(5000)
-                        .searchBluetoothLeDevice(2000)
-                        .build(), 10, TimeUnit.SECONDS)
-                .subscribe(searchResult -> {
-                    adapter.m_searchResults.add(searchResult);
-                    adapter.notifyItemInserted(adapter.m_searchResults.size());
-                }));
+        bleList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        searchBle.setOnClickListener(v -> new RxPermissions(this).request(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
+                .subscribe(aBoolean -> {
+                            if (aBoolean) {
+                                Set<String> searchResultSet = new HashSet<>();
+                                RxBluetooth.getInstance()
+                                        .search(new SearchRequest.Builder()
+                                                .searchBluetoothLeDevice(3000, 3)
+                                                .searchBluetoothClassicDevice(5000)
+                                                .searchBluetoothLeDevice(2000)
+                                                .build(), 10, TimeUnit.SECONDS)
+                                        .subscribe(searchResult -> {
+                                            Log.e(TAG, searchResult.toString());
+                                            if (!searchResultSet.contains(searchResult.getAddress())) {
+                                                searchResultSet.add(searchResult.getAddress());
+                                                adapter.addItem(adapter.getItemCount(), searchResult);
+                                                adapter.notifyItemRangeInserted(adapter.getItemCount(), 1);
+                                            }
+                                        });
+                            }
+                        }
+                ));
     }
 
     @Override
