@@ -8,7 +8,7 @@ import android.widget.Button;
 
 import com.inuker.bluetooth.library.search.SearchRequest;
 import com.inuker.bluetooth.library.search.SearchResult;
-import com.jack.rx.bluetooth.R;
+import com.jack.bluetooth.R;
 import com.jack.rx.bluetooth.RxBluetooth;
 import com.jack.test.js100.JS100BluetoothHolder;
 import com.jack.test.js100.JS100Param;

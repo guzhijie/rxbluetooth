@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.inuker.bluetooth.library.search.SearchResult;
-import com.jack.rx.bluetooth.R;
+import com.jack.bluetooth.R;
 
 import java.util.ArrayList;
 import java.util.List;
