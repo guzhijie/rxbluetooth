@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.inuker.bluetooth.library.search.SearchResult;
-import com.jack.rx.bluetooth.R;
+import com.jack.bluetooth.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     public Adapter addItem(int pos, SearchResult searchResult) {
         this.m_searchResults.add(pos, searchResult);
-        Log.e(TAG, "当前队列长度:" + m_searchResults.size());
         return this;
     }
 

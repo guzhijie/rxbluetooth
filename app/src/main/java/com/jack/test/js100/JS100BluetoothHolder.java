@@ -1,22 +1,22 @@
 package com.jack.test.js100;
 
-        import com.jack.rx.bluetooth.BluetoothException;
-        import com.jack.rx.bluetooth.RxBluetooth;
-        import com.jack.test.SensorBluetoothHolder;
+import com.jack.rx.bluetooth.BluetoothException;
+import com.jack.rx.bluetooth.RxBluetooth;
+import com.jack.test.SensorBluetoothHolder;
 
-        import java.util.Arrays;
-        import java.util.UUID;
+import java.util.Arrays;
+import java.util.UUID;
 
-        import io.reactivex.Observable;
-        import io.reactivex.ObservableOperator;
-        import io.reactivex.ObservableTransformer;
+import io.reactivex.Observable;
+import io.reactivex.ObservableOperator;
+import io.reactivex.ObservableTransformer;
 
-        import static com.jack.test.BluetoothConstants.BATTERY_SERVICE_UUID;
-        import static com.jack.test.BluetoothConstants.READ_DATA_MIN_LEN;
-        import static com.jack.test.BluetoothConstants.UUID_2A19;
-        import static com.jack.test.BluetoothConstants.UUID_FFF0;
-        import static com.jack.test.BluetoothConstants.UUID_FFF1;
-        import static com.jack.test.BluetoothConstants.UUID_FFF2;
+import static com.jack.test.BluetoothConstants.BATTERY_SERVICE_UUID;
+import static com.jack.test.BluetoothConstants.READ_DATA_MIN_LEN;
+import static com.jack.test.BluetoothConstants.UUID_2A19;
+import static com.jack.test.BluetoothConstants.UUID_FFF0;
+import static com.jack.test.BluetoothConstants.UUID_FFF1;
+import static com.jack.test.BluetoothConstants.UUID_FFF2;
 
 /**
  * 描述:

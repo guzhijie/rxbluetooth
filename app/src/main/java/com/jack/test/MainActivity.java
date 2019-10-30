@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.inuker.bluetooth.library.search.SearchRequest;
 import com.inuker.bluetooth.library.search.SearchResult;
-import com.jack.rx.bluetooth.R;
+import com.jack.bluetooth.R;
 import com.jack.rx.bluetooth.RxBluetooth;
 import com.jack.test.js100.JS100BluetoothHolder;
 import com.jack.test.js100.JS100Param;
@@ -82,10 +82,10 @@ public class MainActivity extends AppCompatActivity {
                             String vibrate = zc1000SensorData.getVibrate();
                             String rfid = zc1000SensorData.getRFID();
                         }
-                    });
+                    }, Throwable::printStackTrace);
         });
+        bleList.setLayoutManager(new LinearLayoutManager(this));
         bleList.setAdapter(adapter);
-        bleList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         searchBle.setOnClickListener(v -> new RxPermissions(this).request(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
                 .subscribe(aBoolean -> {
                             if (aBoolean) {
@@ -97,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
                                                 .searchBluetoothLeDevice(2000)
                                                 .build(), 10, TimeUnit.SECONDS)
                                         .subscribe(searchResult -> {
-                                            Log.e(TAG, searchResult.toString());
                                             if (!searchResultSet.contains(searchResult.getAddress())) {
                                                 searchResultSet.add(searchResult.getAddress());
                                                 adapter.addItem(adapter.getItemCount(), searchResult);
