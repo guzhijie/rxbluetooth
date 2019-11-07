@@ -8,6 +8,9 @@ import java.lang.reflect.Type;
 
 import io.reactivex.Observable;
 
+import static com.jack.test.BluetoothConstants.UUID_180A;
+import static com.jack.test.BluetoothConstants.UUID_2A29;
+
 /**
  * 描述:
  *
@@ -26,6 +29,12 @@ public abstract class SensorBluetoothHolder<T extends SensorData<T, ?, ?, ?, ?>,
     @Override
     public final String getMac() {
         return mac;
+    }
+
+    @Override
+    public Observable<String> deviceInfo() {
+        return rxBluetooth.read(mac, UUID_180A, UUID_2A29)
+                .map(String::new);
     }
 
     public abstract Observable<T> sensorObservable(P param);
