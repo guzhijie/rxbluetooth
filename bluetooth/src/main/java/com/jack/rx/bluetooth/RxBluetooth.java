@@ -41,7 +41,7 @@ public final class RxBluetooth extends BaseRxBluetooth {
                             .takeUntil(m_stopReconnect.filter(s -> s.equals(mac)))
                             .doOnSubscribe(disposable -> m_bluetoothStatusBus.onNext(Pair.create(mac, BluetoothStatus.CONNECTING)))
                             .retry(3)
-                            .doOnSubscribe(disposable -> m_client.unregisterConnectStatusListener(mac, m_connectStatusListener))
+                            .doFinally(() -> m_client.unregisterConnectStatusListener(mac, m_connectStatusListener))
                             .subscribe(bluetoothHolder -> {
                             }, throwable -> {
                                 m_bluetoothMap.remove(mac);
