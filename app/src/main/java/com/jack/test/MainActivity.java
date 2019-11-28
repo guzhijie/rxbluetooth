@@ -2,17 +2,18 @@ package com.jack.test;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.widget.Button;
 import android.widget.Toast;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.inuker.bluetooth.library.search.SearchRequest;
 import com.inuker.bluetooth.library.search.SearchResult;
 import com.jack.bluetooth.R;
 import com.jack.rx.bluetooth.RxBluetooth;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.trello.rxlifecycle3.components.support.RxAppCompatActivity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +30,7 @@ import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends RxAppCompatActivity {
     private final static String TAG = MainActivity.class.getName();
     @BindView(R.id.ble_list)
     RecyclerView bleList;

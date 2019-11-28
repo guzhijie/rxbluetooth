@@ -1,9 +1,10 @@
 package com.jack.rx.websocket;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
+
+import androidx.annotation.NonNull;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.drafts.Draft;
