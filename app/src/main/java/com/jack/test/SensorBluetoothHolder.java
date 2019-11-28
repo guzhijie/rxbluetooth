@@ -7,6 +7,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import static com.jack.test.BluetoothConstants.UUID_180A;
 import static com.jack.test.BluetoothConstants.UUID_2A29;
@@ -32,7 +33,7 @@ public abstract class SensorBluetoothHolder<T extends SensorData<T, ?, ?, ?, ?>,
     }
 
     @Override
-    public Observable<String> deviceInfo() {
+    public Single<String> deviceInfo() {
         return rxBluetooth.read(mac, UUID_180A, UUID_2A29)
                 .map(String::new);
     }

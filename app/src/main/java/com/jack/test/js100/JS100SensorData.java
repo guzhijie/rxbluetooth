@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;
 import io.reactivex.Observer;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
 import static com.jack.test.BluetoothConstants.UUID_FFF0;
@@ -165,8 +166,8 @@ public class JS100SensorData extends SensorData<JS100SensorData, Float, Float, F
                         }
                         Pair<Integer, byte[]> pair = getLostDataPackageCountAndIndexArray();
                         if (0 != pair.first) {
-                            Observable.timer(200, TimeUnit.MICROSECONDS)
-                                    .concatMap(aLong -> RxBluetooth.getInstance()
+                            Single.timer(200, TimeUnit.MICROSECONDS)
+                                    .flatMap(aLong -> RxBluetooth.getInstance()
                                             .write(m_js100BluetoothHolder.getMac(), UUID_FFF0, UUID_FFF3, pair.second))
                                     .onErrorReturn(throwable -> false)
                                     .subscribe();

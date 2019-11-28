@@ -21,6 +21,9 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -45,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
             SearchResult searchResult = (SearchResult) o;
             RxBluetooth.getInstance().connect(searchResult.device.getAddress(), new SensorBluetoothHolderFactory())
                     .map(bluetoothHolder -> (SensorBluetoothHolder<? extends SensorData, ?>) bluetoothHolder)
-                    .concatMap(SensorBluetoothHolder::deviceInfo)
+                    .flatMap(SensorBluetoothHolder::deviceInfo)
                     .subscribe(s -> Toast.makeText(this, s, Toast.LENGTH_LONG).show());
 //                    .concatMap(sensorBluetoothHolder -> {
 //                        Type type = sensorBluetoothHolder.getType();

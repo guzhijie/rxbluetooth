@@ -76,6 +76,7 @@ public final class JS100BluetoothHolder extends SensorBluetoothHolder<JS100Senso
     @Override
     public Observable<JS100SensorData> sensorObservable(JS100Param param) {
         return rxBluetooth.write(mac, UUID_FFF0, UUID_FFF1, param.toByteArray())
+                .toObservable()
                 .concatMap(aBoolean -> rxBluetooth.notify(mac, UUID_FFF0, UUID_FFF2))
                 .compose(notifyTransformer(UUID_FFF0, UUID_FFF2));
 

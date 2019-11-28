@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 import static com.inuker.bluetooth.library.Constants.REQUEST_SUCCESS;
@@ -60,22 +61,20 @@ public abstract class BaseRxBluetooth {
      *
      * @return
      */
-    public Observable<Boolean> openBluetooth() {
+    public Single<Boolean> openBluetooth() {
         final BluetoothStateListener[] listeners = new BluetoothStateListener[1];
-        return Observable.<Boolean>create(emitter -> {
+        return Single.<Boolean>create(emitter -> {
             listeners[0] = new BluetoothStateListener() {
                 @Override
                 public void onBluetoothStateChanged(final boolean openOrClosed) {
                     if (!emitter.isDisposed()) {
-                        emitter.onNext(openOrClosed);
-                        emitter.onComplete();
+                        emitter.onSuccess(openOrClosed);
                     }
                 }
             };
             m_client.registerBluetoothStateListener(listeners[0]);
             if (!m_client.openBluetooth()) {
-                emitter.onNext(false);
-                emitter.onComplete();
+                emitter.onSuccess(false);
             }
         }).doFinally(() -> m_client.unregisterBluetoothStateListener(listeners[0]));
     }
@@ -85,22 +84,20 @@ public abstract class BaseRxBluetooth {
      *
      * @return
      */
-    public Observable<Boolean> closeBluetooth() {
+    public Single<Boolean> closeBluetooth() {
         final BluetoothStateListener[] listeners = new BluetoothStateListener[1];
-        return Observable.<Boolean>create(emitter -> {
+        return Single.<Boolean>create(emitter -> {
             listeners[0] = new BluetoothStateListener() {
                 @Override
                 public void onBluetoothStateChanged(final boolean openOrClosed) {
                     if (!emitter.isDisposed()) {
-                        emitter.onNext(!openOrClosed);
-                        emitter.onComplete();
+                        emitter.onSuccess(!openOrClosed);
                     }
                 }
             };
             m_client.registerBluetoothStateListener(listeners[0]);
             if (!m_client.closeBluetooth()) {
-                emitter.onNext(false);
-                emitter.onComplete();
+                emitter.onSuccess(false);
             }
         }).doFinally(() -> m_client.unregisterBluetoothStateListener(listeners[0]));
     }
@@ -145,12 +142,11 @@ public abstract class BaseRxBluetooth {
         return BluetoothStatus.valueOf(m_client.getConnectStatus(mac));
     }
 
-    public Observable<byte[]> read(String mac, UUID serviceUUID, UUID characterUUID) {
-        return Observable.create(emitter -> {
+    public Single<byte[]> read(String mac, UUID serviceUUID, UUID characterUUID) {
+        return Single.create(emitter -> {
             m_client.read(mac, serviceUUID, characterUUID, (code, data) -> {
                 if (code == REQUEST_SUCCESS) {
-                    emitter.onNext(data);
-                    emitter.onComplete();
+                    emitter.onSuccess(data);
                 } else {
                     @SuppressLint("DefaultLocale")
                     String msg = String.format("read %s @ %s : %s error = %d", mac, serviceUUID.toString(), characterUUID.toString(), code);
@@ -160,12 +156,11 @@ public abstract class BaseRxBluetooth {
         });
     }
 
-    public Observable<Boolean> write(String mac, UUID serviceUUID, UUID characterUUID, byte[] value) {
-        return Observable.create(emitter -> {
+    public Single<Boolean> write(String mac, UUID serviceUUID, UUID characterUUID, byte[] value) {
+        return Single.create(emitter -> {
             m_client.write(mac, serviceUUID, characterUUID, value, code -> {
                 if (code == REQUEST_SUCCESS) {
-                    emitter.onNext(true);
-                    emitter.onComplete();
+                    emitter.onSuccess(true);
                 } else {
                     @SuppressLint("DefaultLocale")
                     String msg = String.format("write %s @ %s : %s error = %d", mac, serviceUUID.toString(), characterUUID.toString(), code);
@@ -197,12 +192,11 @@ public abstract class BaseRxBluetooth {
         }));
     }
 
-    public Observable<byte[]> readDescriptor(String mac, UUID serviceUUID, UUID characterUUID, UUID descriptorUUID) {
-        return Observable.create(emitter -> {
+    public Single<byte[]> readDescriptor(String mac, UUID serviceUUID, UUID characterUUID, UUID descriptorUUID) {
+        return Single.create(emitter -> {
             m_client.readDescriptor(mac, serviceUUID, characterUUID, descriptorUUID, (code, data) -> {
                 if (code == REQUEST_SUCCESS) {
-                    emitter.onNext(data);
-                    emitter.onComplete();
+                    emitter.onSuccess(data);
                 } else {
                     @SuppressLint("DefaultLocale")
                     String msg = String.format("readDescriptor %s @ %s : %s error = %d", mac, serviceUUID.toString(), characterUUID.toString(), code);
@@ -212,12 +206,11 @@ public abstract class BaseRxBluetooth {
         });
     }
 
-    public Observable<Boolean> writeDescriptor(String mac, UUID serviceUUID, UUID characterUUID, UUID descriptorUUID, byte[] value) {
-        return Observable.create(emitter -> {
+    public Single<Boolean> writeDescriptor(String mac, UUID serviceUUID, UUID characterUUID, UUID descriptorUUID, byte[] value) {
+        return Single.create(emitter -> {
             m_client.writeDescriptor(mac, serviceUUID, characterUUID, descriptorUUID, value, code -> {
                 if (code == REQUEST_SUCCESS) {
-                    emitter.onNext(true);
-                    emitter.onComplete();
+                    emitter.onSuccess(true);
                 } else {
                     @SuppressLint("DefaultLocale")
                     String msg = String.format("writeDescriptor %s @ %s : %s error = %d", mac, serviceUUID.toString(), characterUUID.toString(), code);
@@ -280,12 +273,11 @@ public abstract class BaseRxBluetooth {
      * @return
      */
     @SuppressLint("DefaultLocale")
-    protected Observable<Pair<BluetoothStatus, BleGattProfile>> connect0(String mac, BleConnectOptions options) {
-        return Observable.<Pair<BluetoothStatus, BleGattProfile>>create(emitter -> {
+    protected Single<Pair<BluetoothStatus, BleGattProfile>> connect0(String mac, BleConnectOptions options) {
+        return Single.<Pair<BluetoothStatus, BleGattProfile>>create(emitter -> {
             m_client.connect(mac, options, (code, data) -> {
                 if (code == REQUEST_SUCCESS) {
-                    emitter.onNext(Pair.create(BluetoothStatus.CONNECTED, data));
-                    emitter.onComplete();
+                    emitter.onSuccess(Pair.create(BluetoothStatus.CONNECTED, data));
                 } else {
                     emitter.onError(new BluetoothException(String.format("connect code = %d", code)));
                 }
@@ -299,15 +291,14 @@ public abstract class BaseRxBluetooth {
      * @param mac
      * @return
      */
-    protected Observable<BluetoothStatus> disconnect0(String mac) {
+    protected Single<BluetoothStatus> disconnect0(String mac) {
         final BleConnectStatusListener[] listeners = new BleConnectStatusListener[1];
-        return Observable.<BluetoothStatus>create(emitter -> {
+        return Single.<BluetoothStatus>create(emitter -> {
             listeners[0] = new BleConnectStatusListener() {
                 @Override
                 public void onConnectStatusChanged(final String address, final int status) {
                     if (address.equals(mac) && !emitter.isDisposed()) {
-                        emitter.onNext(BluetoothStatus.valueOf(status));
-                        emitter.onComplete();
+                        emitter.onSuccess(BluetoothStatus.valueOf(status));
                     }
                 }
             };

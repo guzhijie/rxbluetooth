@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
+import io.reactivex.Single;
 
 /**
  * 描述:
@@ -17,7 +18,7 @@ public interface BluetoothHolder {
 
     Observable<Float> readPower();
 
-    Observable<String> deviceInfo();
+    Single<String> deviceInfo();
 
     <T> ObservableTransformer<byte[], T> notifyTransformer(UUID serviceUUID, UUID characterUUID);
 
