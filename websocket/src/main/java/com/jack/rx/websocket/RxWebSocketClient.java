@@ -12,10 +12,14 @@ import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.ConnectException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.BackpressureStrategy;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.subjects.PublishSubject;
 
 /**
@@ -34,33 +38,42 @@ public final class RxWebSocketClient {
     private Map<String, String> m_httpHeaders;
     private int m_connectTimeout = -1;
     private WebSocketClientImpl m_webSocketClient;
-    private boolean m_autoReconnect = false;
+    private boolean m_autoReconnect;
 
-    public RxWebSocketClient(@NonNull URI serverUri) {
+    public RxWebSocketClient(@NonNull URI serverUri, boolean autoReconnect) {
         this.m_serverUri = serverUri;
+        this.m_autoReconnect = autoReconnect;
     }
 
-    public RxWebSocketClient(@NonNull URI serverUri, Draft protocolDraft) {
-        this.m_serverUri = serverUri;
-        this.m_protocolDraft = protocolDraft;
-    }
-
-    public RxWebSocketClient(@NonNull URI serverUri, Map<String, String> httpHeaders) {
-        this.m_serverUri = serverUri;
-        this.m_httpHeaders = httpHeaders;
-    }
-
-    public RxWebSocketClient(@NonNull URI serverUri, Draft protocolDraft, Map<String, String> httpHeaders) {
+    public RxWebSocketClient(@NonNull URI serverUri, Draft protocolDraft, boolean autoReconnect) {
         this.m_serverUri = serverUri;
         this.m_protocolDraft = protocolDraft;
-        this.m_httpHeaders = httpHeaders;
+        this.m_autoReconnect = autoReconnect;
     }
 
-    public RxWebSocketClient(@NonNull URI serverUri, Draft protocolDraft, Map<String, String> httpHeaders, int connectTimeout) {
+    public RxWebSocketClient(@NonNull URI serverUri, Map<String, String> httpHeaders,
+                             boolean autoReconnect) {
+        this.m_serverUri = serverUri;
+        this.m_httpHeaders = httpHeaders;
+        this.m_autoReconnect = autoReconnect;
+    }
+
+    public RxWebSocketClient(@NonNull URI serverUri, Draft protocolDraft,
+                             Map<String, String> httpHeaders, boolean autoReconnect) {
+        this.m_serverUri = serverUri;
+        this.m_protocolDraft = protocolDraft;
+        this.m_httpHeaders = httpHeaders;
+        this.m_autoReconnect = autoReconnect;
+    }
+
+    public RxWebSocketClient(@NonNull URI serverUri, Draft protocolDraft,
+                             Map<String, String> httpHeaders, int connectTimeout,
+                             boolean autoReconnect) {
         this.m_serverUri = serverUri;
         this.m_protocolDraft = protocolDraft;
         this.m_httpHeaders = httpHeaders;
         this.m_connectTimeout = connectTimeout;
+        this.m_autoReconnect = autoReconnect;
     }
 
     public Observable<String> onMessageObservable() {
@@ -68,20 +81,21 @@ public final class RxWebSocketClient {
     }
 
     @SuppressLint("CheckResult")
-    public Observable<Boolean> connect() {
+    public Single<Boolean> connect() {
         if (m_webSocketClient == null) {
             return connect0().map(pair -> {
                 m_webSocketClient = pair.first;
                 if (m_autoReconnect) {
                     //noinspection ResultOfMethodCallIgnored
                     m_webSocketClient.onEventObservable()
-                            .filter(o -> o instanceof Exception)
+                            .ofType(Exception.class)
                             .take(1)
-                            .concatMap(o -> connect0()
+                            .singleOrError()
+                            .flatMap(o -> connect0()
                                     .retryWhen(throwableObservable -> throwableObservable
-                                            .zipWith(Observable.range(1, MAX_RECONNECT), (throwable, integer) -> integer)
-                                            .flatMap(i -> Observable.timer(i, TimeUnit.SECONDS)))
-                                    .doOnNext(pair1 -> {
+                                            .zipWith(Observable.range(1, MAX_RECONNECT).toFlowable(BackpressureStrategy.BUFFER), (throwable, integer) -> integer)
+                                            .flatMap(i -> Observable.timer(i, TimeUnit.SECONDS).toFlowable(BackpressureStrategy.BUFFER)))
+                                    .doOnSuccess(pair1 -> {
                                         m_webSocketClient = pair1.first;
                                         m_reConnectSubject.onNext(WebSocket.READYSTATE.OPEN);
                                     })
@@ -96,39 +110,37 @@ public final class RxWebSocketClient {
             });
         } else {
             if (m_webSocketClient.isOpen()) {
-                return Observable.just(true);
+                return Single.just(true);
             } else if (m_autoReconnect) {
-                return m_reConnectSubject.take(1).map(readystate -> readystate == WebSocket.READYSTATE.OPEN);
+                return m_reConnectSubject.take(1)
+                        .map(readystate -> readystate == WebSocket.READYSTATE.OPEN)
+                        .singleOrError();
             } else {
-                return Observable.just(false);
+                return Single.just(false);
             }
         }
     }
 
-    public Observable<Boolean> close() {
+    public Single<Boolean> close() {
         if (m_webSocketClient == null) {
-            return Observable.just(true);
+            return Single.just(true);
         } else if (m_webSocketClient.isOpen()) {
             return close0();
         } else if (m_autoReconnect) {
-            return m_reConnectSubject.take(1).concatMap(readystate -> {
-                if (readystate == WebSocket.READYSTATE.OPEN) {
-                    return close0();
-                } else {
-                    return Observable.just(true);
-                }
-            });
+            return m_reConnectSubject.take(1).singleOrError()
+                    .flatMap(readystate -> readystate == WebSocket.READYSTATE.OPEN ? close0() : Single.just(true));
         } else {
-            return Observable.just(true);
+            return Single.just(true);
         }
     }
 
     @SuppressLint("CheckResult")
-    private Observable<Pair<WebSocketClientImpl, WebSocket.READYSTATE>> connect0() {
-        return Observable.just(createWebSocketClientImpl())
-                .concatMap(webSocketClient -> webSocketClient.onEventObservable()
+    private Single<Pair<WebSocketClientImpl, WebSocket.READYSTATE>> connect0() {
+        return Single.just(createWebSocketClientImpl())
+                .flatMap(webSocketClient -> webSocketClient.onEventObservable()
                         .doOnSubscribe(disposable -> webSocketClient.connect())
                         .take(1)
+                        .singleOrError()
                         .map(o -> {
                             if (o instanceof ServerHandshake) {
                                 ServerHandshake serverHandshake = (ServerHandshake) o;
@@ -148,13 +160,13 @@ public final class RxWebSocketClient {
                         }));
     }
 
-    private Observable<Boolean> close0() {
+    private Single<Boolean> close0() {
         return m_webSocketClient.onEventObservable()
                 .doOnSubscribe(disposable -> m_webSocketClient.close())
-                .filter(o -> o instanceof Object[])
+                .ofType(Object[].class)
                 .take(1)
-                .map(o -> {
-                    Object[] objects = (Object[]) o;
+                .singleOrError()
+                .map(objects -> {
                     int code = (int) objects[0];
                     String reason = (String) objects[1];
                     boolean remote = (boolean) objects[2];
