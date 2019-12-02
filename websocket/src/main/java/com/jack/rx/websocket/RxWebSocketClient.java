@@ -146,8 +146,7 @@ public final class RxWebSocketClient {
                                 ServerHandshake serverHandshake = (ServerHandshake) o;
                                 if (101 == serverHandshake.getHttpStatus()) {
                                     webSocketClient.onEventObservable()
-                                            .filter(o1 -> o1 instanceof String)
-                                            .map(o1 -> (String) o1)
+                                            .ofType(String.class)
                                             .subscribe(m_messageSubject);
                                     return Pair.create(webSocketClient, webSocketClient.getReadyState());
                                 } else {
