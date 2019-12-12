@@ -11,6 +11,8 @@ android {
         versionName "1.0"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        javaCompileOptions { annotationProcessorOptions { includeCompileClasspath = true } }
+
     }
     buildTypes {
         release {
@@ -68,6 +70,23 @@ dependencies {
 
     // If you want to use Android Lifecycle for providers
     implementation 'com.trello.rxlifecycle3:rxlifecycle-android-lifecycle:3.1.0'
+
+
+    def dbflow_version = "4.2.4"
+    def sqlcipher_version = "3.5.4"
+
+    // if Java use this. If using Kotlin do NOT use this.
+    annotationProcessor "com.github.Raizlabs.DBFlow:dbflow-processor:${dbflow_version}"
+    implementation "com.github.Raizlabs.DBFlow:dbflow-core:${dbflow_version}"
+    implementation "com.github.Raizlabs.DBFlow:dbflow:${dbflow_version}"
+
+    // https://mvnrepository.com/artifact/com.google.auto.service/auto-service
+    implementation group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc6'
+    // https://mvnrepository.com/artifact/com.google.auto.service/auto-service-annotations
+    implementation group: 'com.google.auto.service', name: 'auto-service-annotations', version: '1.0-rc6'
+
+    // https://github.com/square/javapoet
+    implementation 'com.squareup:javapoet:1.11.1'
 
     implementation project(path: ':bluetooth')
     implementation project(path: ':websocket')

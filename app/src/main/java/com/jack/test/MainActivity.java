@@ -22,9 +22,6 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -45,62 +42,10 @@ public class MainActivity extends RxAppCompatActivity {
         setContentView(R.layout.activity_main);
         m_unbinder = ButterKnife.bind(this);
         Adapter adapter = new Adapter();
-        adapter.setOnItemClickListener((view, pos, o) -> {
-            SearchResult searchResult = (SearchResult) o;
-            RxBluetooth.getInstance().connect(searchResult.device.getAddress(), new SensorBluetoothHolderFactory())
-                    .map(bluetoothHolder -> (SensorBluetoothHolder<? extends SensorData, ?>) bluetoothHolder)
-                    .flatMap(SensorBluetoothHolder::deviceInfo)
-                    .subscribe(s -> Toast.makeText(this, s, Toast.LENGTH_LONG).show());
-//                    .concatMap(sensorBluetoothHolder -> {
-//                        Type type = sensorBluetoothHolder.getType();
-//                        if (type instanceof JS100SensorData) {
-//                            JS100BluetoothHolder js100BluetoothHolder = (JS100BluetoothHolder) sensorBluetoothHolder;
-//                            return js100BluetoothHolder.sensorObservable(new JS100Param()
-//                                    .setType(JS100SampleType.Temperature_Vibrate)
-//                                    .setFrequency(JS100SampleFrequency.Freq_1kHz)
-//                                    .setFactor(100)
-//                                    .setPoint(JS100SamplePoint.Point_512));
-//                        } else {
-//                            ZC1000BluetoothHolder zc1000BluetoothHolder = (ZC1000BluetoothHolder) sensorBluetoothHolder;
-//                            return zc1000BluetoothHolder.sensorObservable(null);
-//                        }
-//                    })
-//                    .subscribe(sensorData -> {
-//                        if (sensorData instanceof JS100SensorData) {
-//                            JS100SensorData js100SensorData = (JS100SensorData) sensorData;
-//                            Float vibrate = js100SensorData.getVibrate();
-//                            Float speed = js100SensorData.getSpeed();
-//                            Float temperature = js100SensorData.getTemperature();
-//                        } else if (sensorData instanceof ZC1000SensorData) {
-//                            ZC1000SensorData zc1000SensorData = (ZC1000SensorData) sensorData;
-//                            String temperature = zc1000SensorData.getTemperature();
-//                            String vibrate = zc1000SensorData.getVibrate();
-//                            String rfid = zc1000SensorData.getRFID();
-//                        }
-//                    }, Throwable::printStackTrace);
-        });
+        adapter.setOnItemClickListener((view, pos, o) -> connectBluetooth((SearchResult) o));
         bleList.setLayoutManager(new LinearLayoutManager(this));
         bleList.setAdapter(adapter);
-        searchBle.setOnClickListener(v -> new RxPermissions(this).request(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
-                .subscribe(aBoolean -> {
-                            if (aBoolean) {
-                                Set<String> searchResultSet = new HashSet<>();
-                                RxBluetooth.getInstance()
-                                        .search(new SearchRequest.Builder()
-                                                .searchBluetoothLeDevice(3000, 3)
-                                                .searchBluetoothClassicDevice(5000)
-                                                .searchBluetoothLeDevice(2000)
-                                                .build(), 10, TimeUnit.SECONDS)
-                                        .subscribe(searchResult -> {
-                                            if (!searchResultSet.contains(searchResult.getAddress())) {
-                                                searchResultSet.add(searchResult.getAddress());
-                                                adapter.addItem(adapter.getItemCount(), searchResult);
-                                                adapter.notifyItemRangeInserted(adapter.getItemCount(), 1);
-                                            }
-                                        });
-                            }
-                        }
-                ));
+        searchBle.setOnClickListener(v -> searchBluetooth(adapter));
     }
 
     @Override
@@ -109,4 +54,34 @@ public class MainActivity extends RxAppCompatActivity {
         m_unbinder.unbind();
     }
 
+    @SuppressLint("CheckResult")
+    private void connectBluetooth(SearchResult searchResult) {
+        RxBluetooth.getInstance()
+                .connect(searchResult.device.getAddress(), new SensorBluetoothHolderFactory())
+                .map(bluetoothHolder -> (SensorBluetoothHolder<? extends SensorData, ?>) bluetoothHolder)
+                .flatMap(SensorBluetoothHolder::deviceInfo)
+                .subscribe(s -> Toast.makeText(this, s, Toast.LENGTH_LONG).show());
+    }
+
+    @SuppressLint("CheckResult")
+    private void searchBluetooth(Adapter adapter) {
+        final Set<String> searchResultSet = new HashSet<>();
+        final SearchRequest searchRequest = new SearchRequest.Builder()
+                .searchBluetoothLeDevice(3000, 3)
+                .searchBluetoothClassicDevice(5000)
+                .searchBluetoothLeDevice(2000)
+                .build();
+        new RxPermissions(this).request(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
+                .subscribe(aBoolean -> {
+                    if (aBoolean) {
+                        RxBluetooth.getInstance().search(searchRequest, 10, TimeUnit.SECONDS)
+                                .filter(searchResult -> !searchResultSet.contains(searchResult.getAddress()))
+                                .subscribe(searchResult -> {
+                                    searchResultSet.add(searchResult.getAddress());
+                                    adapter.addItem(adapter.getItemCount(), searchResult);
+                                    adapter.notifyItemRangeInserted(adapter.getItemCount(), 1);
+                                });
+                    }
+                });
+    }
 }
