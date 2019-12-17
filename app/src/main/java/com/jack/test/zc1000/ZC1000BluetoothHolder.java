@@ -26,7 +26,7 @@ public final class ZC1000BluetoothHolder extends SensorBluetoothHolder<ZC1000Sen
 
     @Override
     public Observable<Float> readPower() {
-        return rxBluetooth.notify(mac, BATTERY_SERVICE_UUID, BATTERY_LEVEL_UUID)
+        return m_rxBluetooth.notify(m_mac, BATTERY_SERVICE_UUID, BATTERY_LEVEL_UUID)
                 .map(bytes -> (bytes[0] & 0xFF))
                 .map(Integer::floatValue);
     }
@@ -49,7 +49,7 @@ public final class ZC1000BluetoothHolder extends SensorBluetoothHolder<ZC1000Sen
 
     @Override
     public Observable<ZC1000SensorData> sensorObservable(Void param) {
-        return rxBluetooth.notify(mac, UUID_FFE0, UUID_FFE4)
+        return m_rxBluetooth.notify(m_mac, UUID_FFE0, UUID_FFE4)
                 .compose(notifyTransformer(UUID_FFE0, UUID_FFE4));
     }
 }
