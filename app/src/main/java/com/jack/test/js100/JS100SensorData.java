@@ -7,7 +7,6 @@ import com.jack.test.SensorData;
 
 import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;
 import io.reactivex.Observer;
 import io.reactivex.Single;
@@ -24,22 +23,14 @@ import static com.jack.test.BluetoothConstants.WRITE_DATA_MAX_LEN;
  * @since : 2019/8/13
  */
 public class JS100SensorData extends SensorData<JS100SensorData, Float, Float, Float, Float> {
-    //温度
-    private float temp;
-    //采样类型
-    private int sampleType;
-    //带宽
-    private int bandwidth;
-    //采样点数
-    private int samplePoints;
-    //总包数
-    private int totalPackages;
-    //系数
-    private float factor;
-    //数据包
-    private short[] data;
-    //计算缓存值
-    private float[] values;
+    private float temp;          //温度
+    private int sampleType;      //采样类型
+    private int bandwidth;       //带宽
+    private int samplePoints;    //采样点数
+    private int totalPackages;   //总包数
+    private float factor;        //系数
+    private short[] data;        //数据包
+    private float[] values;      //计算缓存值
 
     @Override
     public Float getTemperature() {
@@ -79,20 +70,13 @@ public class JS100SensorData extends SensorData<JS100SensorData, Float, Float, F
      * [  绝对值最大值*系数, <br>(最大-最小)*系数, <br>平均值*系数, <br> 绝对值均值*系数, <br> 平方根均值*系数,<br> 平方均值*系数 ]
      */
     private void calcCachedRelateValue() {
-        //最大值
-        int max = this.data[0];
-        //绝对值最大值
-        float absMax = Math.abs(max);
-        //最小值
-        int min = this.data[0];
-        //和值
-        int sum = 0;
-        //绝对值和
-        int absSum = 0;
-        //平方和
-        float powerSum = 0.0f;
-        //平方根和
-        float sqrSum = 0.0f;
+        int max = this.data[0];         //最大值
+        float absMax = Math.abs(max);   //绝对值最大值
+        int min = this.data[0];         //最小值
+        int sum = 0;                    //和值
+        int absSum = 0;                 //绝对值和
+        float powerSum = 0.0f;          //平方和
+        float sqrSum = 0.0f;            //平方根和
         for (int i = 0; i < this.samplePoints; ++i) {
             float absValue = Math.abs(this.data[i]);
             if (absValue > absMax) {
@@ -233,12 +217,19 @@ public class JS100SensorData extends SensorData<JS100SensorData, Float, Float, F
                  * @return
                  */
                 private int firstDataPackage(byte[] value) {
-                    int temp = (value[1] << 8 & 0xFF00) | (value[2] & 0xFF);
+                    int temp = (value[1] << 8 & 0xFF00)
+                            | (value[2] & 0xFF);
                     int sampleType = value[3] & 0xFF;
-                    int bandwidth = (value[4] << 8 & 0xFF00) | (value[5] & 0xFF);
-                    int samplePoints = (value[6] << 8 & 0xFF00) | (value[7] & 0xFF);
-                    int totalPackages = samplePoints * 2 / (WRITE_DATA_MAX_LEN - 1) + (0 == (samplePoints * 2) % (WRITE_DATA_MAX_LEN - 1) ? 0 : 1);
-                    int factor = (value[12] << 24 & 0xFF000000) | (value[11] << 16 & 0xFF0000) | (value[10] << 8 & 0xFF00) | (value[9] & 0xFF);
+                    int bandwidth = (value[4] << 8 & 0xFF00)
+                            | (value[5] & 0xFF);
+                    int samplePoints = (value[6] << 8 & 0xFF00)
+                            | (value[7] & 0xFF);
+                    int totalPackages = samplePoints * 2 / (WRITE_DATA_MAX_LEN - 1)
+                            + (0 == (samplePoints * 2) % (WRITE_DATA_MAX_LEN - 1) ? 0 : 1);
+                    int factor = (value[12] << 24 & 0xFF000000)
+                            | (value[11] << 16 & 0xFF0000)
+                            | (value[10] << 8 & 0xFF00)
+                            | (value[9] & 0xFF);
                     m_js100SensorData.temp = temp / 100.0f;
                     m_js100SensorData.sampleType = sampleType;
                     m_js100SensorData.bandwidth = bandwidth;
