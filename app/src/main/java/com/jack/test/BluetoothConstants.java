@@ -17,7 +17,6 @@ public interface BluetoothConstants {
      * @see #UUID_FFF2: 数据通知特征UUID
      * @see #UUID_FFF3: 读取缓存特征UUID
      * @see #UUID_2A19: 电量特征UUID
-     *
      * @see #UUID_180A: 制造商服务UUID
      * @see #UUID_2A29: 制造商UUID
      */
@@ -46,13 +45,10 @@ public interface BluetoothConstants {
     UUID BATTERY_SERVICE_UUID = UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb");
     UUID BATTERY_LEVEL_UUID = UUID.fromString("00002a1b-0000-1000-8000-00805f9b34fb");
 
-    //写入数据最大长度
-    int WRITE_DATA_MAX_LEN = 20;
-    //读取数据最小长度
-    int READ_DATA_MIN_LEN = 2;
 
-    //JS100参数校验开始索引
-    int JS100_COMMAND_XOR_BEGIN_INDEX = 2;
-    //JS100参数校验结束索引
-    int JS100_COMMAND_XOR_END_INDEX = 9;
+    int WRITE_DATA_MAX_LEN = 20; //写入数据最大长度
+    int READ_DATA_MIN_LEN = 2;   //读取数据最小长度
+
+    int JS100_COMMAND_XOR_BEGIN_INDEX = 2; //JS100参数校验开始索引
+    int JS100_COMMAND_XOR_END_INDEX = 9;   //JS100参数校验结束索引
 }
