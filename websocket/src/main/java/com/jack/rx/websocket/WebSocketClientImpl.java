@@ -16,7 +16,7 @@ import io.reactivex.subjects.PublishSubject;
  * @author :jack.gu
  * @since : 2019/11/6
  */
-public final class WebSocketClientImpl extends WebSocketClient {
+final class WebSocketClientImpl extends WebSocketClient {
     private final PublishSubject<Object> m_subject = PublishSubject.create();
 
     WebSocketClientImpl(URI serverUri) {

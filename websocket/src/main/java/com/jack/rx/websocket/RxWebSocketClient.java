@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.drafts.Draft;
+import org.java_websocket.enums.ReadyState;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.ConnectException;
@@ -31,7 +32,7 @@ import io.reactivex.subjects.PublishSubject;
 public final class RxWebSocketClient {
     private final static String TAG = RxWebSocketClient.class.getName();
     private final static int MAX_RECONNECT = 3;
-    private final PublishSubject<WebSocket.READYSTATE> m_reConnectSubject = PublishSubject.create();
+    private final PublishSubject<ReadyState> m_reConnectSubject = PublishSubject.create();
     private final PublishSubject<String> m_messageSubject = PublishSubject.create();
     private URI m_serverUri;
     private Draft m_protocolDraft;
@@ -97,11 +98,11 @@ public final class RxWebSocketClient {
                                             .flatMap(i -> Observable.timer(i, TimeUnit.SECONDS).toFlowable(BackpressureStrategy.BUFFER)))
                                     .doOnSuccess(pair1 -> {
                                         m_webSocketClient = pair1.first;
-                                        m_reConnectSubject.onNext(WebSocket.READYSTATE.OPEN);
+                                        m_reConnectSubject.onNext(ReadyState.OPEN);
                                     })
                                     .doOnError(throwable -> {
                                         m_webSocketClient = null;
-                                        m_reConnectSubject.onNext(WebSocket.READYSTATE.CLOSED);
+                                        m_reConnectSubject.onNext(ReadyState.CLOSED);
                                     }))
                             .subscribe(pair1 -> Log.i(TAG, String.format("reconnect ok : %s", pair1.toString())),
                                     throwable -> Log.e(TAG, String.format("reconnect failed : %s", throwable.getMessage())));
@@ -113,7 +114,7 @@ public final class RxWebSocketClient {
                 return Single.just(true);
             } else if (m_autoReconnect) {
                 return m_reConnectSubject.take(1)
-                        .map(readystate -> readystate == WebSocket.READYSTATE.OPEN)
+                        .map(readystate -> readystate == ReadyState.OPEN)
                         .singleOrError();
             } else {
                 return Single.just(false);
@@ -128,14 +129,14 @@ public final class RxWebSocketClient {
             return close0();
         } else if (m_autoReconnect) {
             return m_reConnectSubject.take(1).singleOrError()
-                    .flatMap(readystate -> readystate == WebSocket.READYSTATE.OPEN ? close0() : Single.just(true));
+                    .flatMap(readystate -> readystate == ReadyState.OPEN ? close0() : Single.just(true));
         } else {
             return Single.just(true);
         }
     }
 
     @SuppressLint("CheckResult")
-    private Single<Pair<WebSocketClientImpl, WebSocket.READYSTATE>> connect0() {
+    private Single<Pair<WebSocketClientImpl, ReadyState>> connect0() {
         return Single.just(createWebSocketClientImpl())
                 .flatMap(webSocketClient -> webSocketClient.onEventObservable()
                         .doOnSubscribe(disposable -> webSocketClient.connect())
