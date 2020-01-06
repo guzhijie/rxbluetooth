@@ -12,6 +12,9 @@ import com.inuker.bluetooth.library.search.SearchRequest;
 import com.inuker.bluetooth.library.search.SearchResult;
 import com.jack.bluetooth.R;
 import com.jack.rx.bluetooth.RxBluetooth;
+import com.jack.test.dbflow.User;
+import com.jack.test.dbflow.User_Table;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.trello.rxlifecycle3.components.support.RxAppCompatActivity;
 
@@ -46,6 +49,7 @@ public class MainActivity extends RxAppCompatActivity {
         bleList.setLayoutManager(new LinearLayoutManager(this));
         bleList.setAdapter(adapter);
         searchBle.setOnClickListener(v -> searchBluetooth(adapter));
+        SQLite.select(User_Table.id, User_Table.name).from(User.class).query();
     }
 
     @Override

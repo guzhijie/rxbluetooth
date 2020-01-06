@@ -3,6 +3,7 @@ package com.jack.test;
 import android.app.Application;
 
 import com.jack.rx.bluetooth.RxBluetooth;
+import com.raizlabs.android.dbflow.config.FlowManager;
 
 /**
  * 描述:
@@ -15,5 +16,6 @@ public final class App extends Application {
     public void onCreate() {
         super.onCreate();
         RxBluetooth.init(this);
+        FlowManager.init(this);
     }
 }
