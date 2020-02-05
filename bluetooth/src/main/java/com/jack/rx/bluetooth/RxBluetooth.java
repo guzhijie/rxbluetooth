@@ -85,7 +85,7 @@ public final class RxBluetooth extends BaseRxBluetooth {
                                 (bluetoothStatus, power) -> new BluetoothInfo.Builder()
                                         .setBluetoothStatus(bluetoothStatus)
                                         .setPower(power))
-                        .join(readRssi(bluetoothHolder.getMac()),
+                        .join(readRssi(bluetoothHolder.getMac()).toObservable(),
                                 builder -> Observable.empty(),
                                 rssi -> Observable.empty(),
                                 (builder, rssi) -> builder.setRssi(rssi).build()));
