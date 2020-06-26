@@ -1,17 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "29.0.2"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.jack.rx.bluetooth"
         minSdkVersion 15
-        targetSdkVersion 27
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions { annotationProcessorOptions { includeCompileClasspath = true } }
+
     }
     buildTypes {
         release {
@@ -77,22 +78,26 @@ dependencies {
     implementation "com.github.Raizlabs.DBFlow:dbflow:${dbflow_version}"
 
     // https://mvnrepository.com/artifact/com.google.auto.service/auto-service
-    implementation group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc6'
+    implementation group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc7'
     // https://mvnrepository.com/artifact/com.google.auto.service/auto-service-annotations
-    implementation group: 'com.google.auto.service', name: 'auto-service-annotations', version: '1.0-rc6'
+    implementation group: 'com.google.auto.service', name: 'auto-service-annotations', version: '1.0-rc7'
+
+    // https://github.com/square/javapoet
+    implementation 'com.squareup:javapoet:1.13.0'
+
+    //  https://github.com/google/google-java-format
+    implementation 'com.google.googlejavaformat:google-java-format:1.8'
 
     // https://mvnrepository.com/artifact/com.alibaba/fastjson
-    implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.62'
+    implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.71'
 
     // https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.7.1'
-    implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
-    implementation 'com.squareup.retrofit2:converter-jaxb:2.7.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-jaxb:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
 
     implementation project(path: ':bluetooth')
     implementation project(path: ':websocket')
-    implementation project(path: ':dtoannotation')
-    annotationProcessor project(path: ':dtoprocessor')
 }

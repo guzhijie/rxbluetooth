@@ -17,7 +17,6 @@ import com.inuker.bluetooth.library.search.response.SearchResponse;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -251,8 +250,11 @@ public abstract class BaseRxBluetooth {
      * @param mac
      * @return
      */
-    public Single<Float> readRssi(String mac) {
-        return Single.create(emitter -> m_client.readRssi(mac, (code, data) -> emitter.onSuccess(code == REQUEST_SUCCESS ? data.floatValue() : Float.NaN)));
+    public Observable<Float> readRssi(String mac) {
+        return Observable.create(emitter -> m_client.readRssi(mac, (code, data) -> {
+            emitter.onNext(code == REQUEST_SUCCESS ? data.floatValue() : Float.NaN);
+            emitter.onComplete();
+        }));
     }
 
     protected void clearRequest(String mac, int type) {

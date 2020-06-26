@@ -1,1 +1,1 @@
-include ':app', ':bluetooth', ':websocket', ':dtoprocessor', ':dtoannotation'
+include ':app', ':bluetooth', ':websocket'
