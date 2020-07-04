@@ -1,6 +1,9 @@
 package com.jack.rx.bluetooth;
 
 
+import com.inuker.bluetooth.library.model.BleGattService;
+
+import java.util.List;
 import java.util.UUID;
 
 import io.reactivex.Observable;
@@ -54,4 +57,10 @@ public interface BluetoothHolder {
      * @return
      */
     <T> ObservableTransformer<byte[], T> readTransformer(UUID serviceUUID, UUID characterUUID);
+
+    List<BleGattService> getServices();
+
+    BleGattService getService(UUID serviceId);
+
+    boolean containsCharacter(UUID serviceId, UUID characterId);
 }

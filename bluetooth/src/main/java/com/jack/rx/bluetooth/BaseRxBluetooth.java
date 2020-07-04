@@ -289,11 +289,13 @@ public abstract class BaseRxBluetooth {
      * @return
      */
     protected Single<BluetoothStatus> disconnect0(String mac) {
+        Log.e(TAG, String.format("准备断开蓝牙%s", mac));
         final BleConnectStatusListener[] listeners = new BleConnectStatusListener[1];
         return Single.<BluetoothStatus>create(emitter -> {
             listeners[0] = new BleConnectStatusListener() {
                 @Override
                 public void onConnectStatusChanged(final String address, final int status) {
+                    Log.e(TAG, String.format("接收到断开蓝牙%s, 状态%d", address, status));
                     if (address.equals(mac) && !emitter.isDisposed()) {
                         emitter.onSuccess(BluetoothStatus.valueOf(status));
                     }
@@ -301,6 +303,7 @@ public abstract class BaseRxBluetooth {
             };
             m_client.registerConnectStatusListener(mac, listeners[0]);
             m_client.disconnect(mac);
+            Log.e(TAG, String.format("disconnect 准备断开蓝牙%s", mac));
         }).doFinally(() -> m_client.unregisterConnectStatusListener(mac, listeners[0]));
     }
 

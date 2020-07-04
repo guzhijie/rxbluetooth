@@ -3,6 +3,7 @@ package com.jack.rx.bluetooth;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 import android.util.Pair;
 
 import com.inuker.bluetooth.library.connect.listener.BleConnectStatusListener;
@@ -25,6 +26,7 @@ import io.reactivex.subjects.PublishSubject;
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public final class RxBluetooth extends BaseRxBluetooth {
+    private final String TAG = RxBluetooth.class.getName();
     private static RxBluetooth m_rxBluetooth;
     private final PublishSubject<Pair<String, BluetoothStatus>> m_bluetoothStatusBus = PublishSubject.create();
     private final PublishSubject<String> m_stopReconnect = PublishSubject.create();
@@ -35,13 +37,19 @@ public final class RxBluetooth extends BaseRxBluetooth {
             final BluetoothStatus bluetoothStatus = BluetoothStatus.valueOf(status);
             m_bluetoothStatusBus.onNext(Pair.create(mac, bluetoothStatus));
             if (BluetoothStatus.CONNECTED != bluetoothStatus) {
-                autoConnect(mac, m_bluetoothMap.get(mac));
+                autoConnect(mac, new BleConnectOptions.Builder()
+                                .setConnectRetry(3)               // 连接如果失败重试3次
+                                .setConnectTimeout(5000)          // 连接超时5s
+                                .setServiceDiscoverRetry(3)       // 发现服务如果失败重试3次
+                                .setServiceDiscoverTimeout(5000)  // 发现服务超时5s
+                                .build(),
+                        m_bluetoothMap.get(mac));
             }
         }
 
         @SuppressLint("CheckResult")
-        private void autoConnect(String mac, BluetoothHolder holder) {
-            connectByMac(mac, (mac1, bleGattProfile) -> Single.just(holder))
+        private void autoConnect(String mac, BleConnectOptions options, BluetoothHolder holder) {
+            connectByMac(mac, options, (mac1, bleGattProfile) -> Single.just(holder))
                     .takeUntil(m_stopReconnect.filter(s -> s.equals(mac)).take(1).singleOrError())
                     .doOnSubscribe(disposable -> m_bluetoothStatusBus.onNext(Pair.create(mac, BluetoothStatus.CONNECTING)))
                     .retry(3)
@@ -91,7 +99,7 @@ public final class RxBluetooth extends BaseRxBluetooth {
                                 (builder, rssi) -> builder.setRssi(rssi).build()));
     }
 
-    public Single<BluetoothHolder> connect(String mac, BluetoothHolderFactory factory) {
+    public Single<BluetoothHolder> connect(String mac, BleConnectOptions options, BluetoothHolderFactory factory) {
         if (m_bluetoothMap.containsKey(mac)) {
             return bluetoothStatusObservable(mac).map(bluetoothStatus -> {
                 if (bluetoothStatus == BluetoothStatus.CONNECTED) {
@@ -101,7 +109,7 @@ public final class RxBluetooth extends BaseRxBluetooth {
                 }
             });
         } else {
-            return connectByMac(mac, factory);
+            return connectByMac(mac, options, factory);
         }
     }
 
@@ -111,12 +119,13 @@ public final class RxBluetooth extends BaseRxBluetooth {
                     .doOnSubscribe(disposable -> m_stopReconnect.onNext(mac))
                     .flatMap(bluetoothStatus -> {
                         if (bluetoothStatus == BluetoothStatus.DISCONNECTED) {
+                            Log.e(TAG, String.format("检查到蓝牙状态%s", bluetoothStatus));
                             return Single.just(BluetoothStatus.DISCONNECTED);
                         } else {
+                            Log.e(TAG, String.format("准备断开蓝牙状态%s", bluetoothStatus));
                             return disconnect0(mac).doFinally(() -> m_bluetoothMap.remove(mac));
                         }
                     });
-
         } else {
             return Single.just(BluetoothStatus.DISCONNECTED);
         }
@@ -139,13 +148,7 @@ public final class RxBluetooth extends BaseRxBluetooth {
                 .first(BluetoothStatus.DISCONNECTED);
     }
 
-    private Single<BluetoothHolder> connectByMac(String mac, BluetoothHolderFactory factory) {
-        BleConnectOptions options = new BleConnectOptions.Builder()
-                .setConnectRetry(3)               // 连接如果失败重试3次
-                .setConnectTimeout(30000)         // 连接超时30s
-                .setServiceDiscoverRetry(3)       // 发现服务如果失败重试3次
-                .setServiceDiscoverTimeout(20000) // 发现服务超时20s
-                .build();
+    private Single<BluetoothHolder> connectByMac(String mac, BleConnectOptions options, BluetoothHolderFactory factory) {
         return connect0(mac, options)
                 .flatMap(profilePair -> factory.create(mac, profilePair.second).map(bluetoothHolder -> {
                     m_bluetoothMap.put(mac, bluetoothHolder);
