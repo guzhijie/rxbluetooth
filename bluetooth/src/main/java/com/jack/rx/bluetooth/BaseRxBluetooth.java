@@ -2,6 +2,7 @@ package com.jack.rx.bluetooth;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Pair;
 
@@ -14,6 +15,7 @@ import com.inuker.bluetooth.library.model.BleGattProfile;
 import com.inuker.bluetooth.library.search.SearchRequest;
 import com.inuker.bluetooth.library.search.SearchResult;
 import com.inuker.bluetooth.library.search.response.SearchResponse;
+import com.orhanobut.logger.Logger;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +33,6 @@ import static com.inuker.bluetooth.library.Constants.REQUEST_SUCCESS;
  * @since : 2019/7/6
  */
 public abstract class BaseRxBluetooth {
-    private final String TAG = BaseRxBluetooth.class.getName();
     protected final BluetoothClient m_client;
 
     protected BaseRxBluetooth(Context client) {
@@ -188,7 +189,7 @@ public abstract class BaseRxBluetooth {
                 }
             }
         })).doFinally(() -> m_client.unnotify(mac, serviceUUID, characterUUID, code -> {
-            Log.w(TAG, String.format("unnotify %s %b", mac, code == REQUEST_SUCCESS));
+            Logger.i("unnotify %s %b", mac, code == REQUEST_SUCCESS);
         }));
     }
 
@@ -239,7 +240,7 @@ public abstract class BaseRxBluetooth {
                 }
             }
         })).doFinally(() -> m_client.unindicate(mac, serviceUUID, characterUUID, code -> {
-            Log.w(TAG, String.format("unindicate %s %b", mac, code == REQUEST_SUCCESS));
+            Logger.w("unindicate %s %b", mac, code == REQUEST_SUCCESS);
         }));
     }
 
@@ -289,22 +290,29 @@ public abstract class BaseRxBluetooth {
      * @return
      */
     protected Single<BluetoothStatus> disconnect0(String mac) {
-        Log.e(TAG, String.format("准备断开蓝牙%s", mac));
+        Logger.i("disconnect0 准备断开蓝牙%s", mac);
         final BleConnectStatusListener[] listeners = new BleConnectStatusListener[1];
-        return Single.<BluetoothStatus>create(emitter -> {
-            listeners[0] = new BleConnectStatusListener() {
-                @Override
-                public void onConnectStatusChanged(final String address, final int status) {
-                    Log.e(TAG, String.format("接收到断开蓝牙%s, 状态%d", address, status));
-                    if (address.equals(mac) && !emitter.isDisposed()) {
-                        emitter.onSuccess(BluetoothStatus.valueOf(status));
+        return Single.
+                <BluetoothStatus>create(emitter -> {
+                    /*BleConnectStatusListener 构造函数中需要looper*/
+                    Looper looper = Looper.myLooper();
+                    if (looper == null) {
+                        Looper.prepare();
                     }
-                }
-            };
-            m_client.registerConnectStatusListener(mac, listeners[0]);
-            m_client.disconnect(mac);
-            Log.e(TAG, String.format("disconnect 准备断开蓝牙%s", mac));
-        }).doFinally(() -> m_client.unregisterConnectStatusListener(mac, listeners[0]));
+                    listeners[0] = new BleConnectStatusListener() {
+                        @Override
+                        public void onConnectStatusChanged(final String address, final int status) {
+                            Logger.i("disconnect0 接收到断开蓝牙%s, 状态%d", address, status);
+                            if (address.equals(mac) && !emitter.isDisposed()) {
+                                emitter.onSuccess(BluetoothStatus.valueOf(status));
+                            }
+                        }
+                    };
+                    m_client.registerConnectStatusListener(mac, listeners[0]);
+                    m_client.disconnect(mac);
+                    Logger.i("disconnect0 准备断开蓝牙%s", mac);
+                })
+                .doFinally(() -> m_client.unregisterConnectStatusListener(mac, listeners[0]));
     }
 
     private void stopSearch() {

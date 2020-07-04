@@ -8,6 +8,7 @@ import android.util.Pair;
 
 import com.inuker.bluetooth.library.connect.listener.BleConnectStatusListener;
 import com.inuker.bluetooth.library.connect.options.BleConnectOptions;
+import com.orhanobut.logger.Logger;
 
 import java.util.Collection;
 import java.util.Map;
@@ -26,7 +27,6 @@ import io.reactivex.subjects.PublishSubject;
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public final class RxBluetooth extends BaseRxBluetooth {
-    private final String TAG = RxBluetooth.class.getName();
     private static RxBluetooth m_rxBluetooth;
     private final PublishSubject<Pair<String, BluetoothStatus>> m_bluetoothStatusBus = PublishSubject.create();
     private final PublishSubject<String> m_stopReconnect = PublishSubject.create();
@@ -119,14 +119,15 @@ public final class RxBluetooth extends BaseRxBluetooth {
                     .doOnSubscribe(disposable -> m_stopReconnect.onNext(mac))
                     .flatMap(bluetoothStatus -> {
                         if (bluetoothStatus == BluetoothStatus.DISCONNECTED) {
-                            Log.e(TAG, String.format("检查到蓝牙状态%s", bluetoothStatus));
+                            Logger.i("检查到蓝牙状态%s", bluetoothStatus);
                             return Single.just(BluetoothStatus.DISCONNECTED);
                         } else {
-                            Log.e(TAG, String.format("准备断开蓝牙状态%s", bluetoothStatus));
+                            Logger.i("准备断开蓝牙状态%s", bluetoothStatus);
                             return disconnect0(mac).doFinally(() -> m_bluetoothMap.remove(mac));
                         }
                     });
         } else {
+            Logger.i("蓝牙%s未连接", mac);
             return Single.just(BluetoothStatus.DISCONNECTED);
         }
     }
