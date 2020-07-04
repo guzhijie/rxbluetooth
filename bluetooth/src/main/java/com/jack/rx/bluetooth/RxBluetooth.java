@@ -82,6 +82,10 @@ public final class RxBluetooth extends BaseRxBluetooth {
         return m_bluetoothMap.values();
     }
 
+    /**
+     * 获取蓝牙设备电量，信号强度
+     * @return
+     */
     public Observable<BluetoothInfo> bluetoothStatusObservable() {
         return Observable.fromIterable(getConnectedBluetoothStatus())
                 .concatMap(bluetoothHolder -> m_bluetoothStatusBus.filter(pair -> pair.first.equals(bluetoothHolder.getMac()))

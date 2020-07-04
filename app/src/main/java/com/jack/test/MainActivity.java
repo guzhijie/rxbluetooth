@@ -21,6 +21,7 @@ import com.jack.rx.bluetooth.RxBluetooth;
 import com.jack.test.sensor.SensorBluetoothHolder;
 import com.jack.test.sensor.SensorBluetoothHolderFactory;
 import com.jack.test.sensor.SensorData;
+import com.orhanobut.logger.Logger;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.trello.rxlifecycle3.components.support.RxAppCompatActivity;
 
@@ -41,7 +42,6 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class MainActivity extends RxAppCompatActivity {
-    private final static String TAG = MainActivity.class.getName();
     @BindView(R.id.ble_list)
     RecyclerView bleList;
     @BindView(R.id.search_ble)
@@ -85,6 +85,7 @@ public class MainActivity extends RxAppCompatActivity {
                                 .setServiceDiscoverTimeout(20000) // 发现服务超时20s
                                 .build(),
                         new SensorBluetoothHolderFactory())
+                .timeout(10, TimeUnit.SECONDS)
                 .map(bluetoothHolder -> (SensorBluetoothHolder<? extends SensorData, ?>) bluetoothHolder)
                 .observeOn(AndroidSchedulers.mainThread())
                 .doFinally(dialog::dismiss)
@@ -124,12 +125,13 @@ public class MainActivity extends RxAppCompatActivity {
                 .disconnect(searchResult.getAddress())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doFinally(dialog::dismiss)
+                .doOnError(throwable -> Logger.e("disconnect异常:%s", throwable.getMessage()))
                 .subscribe(bluetoothStatus -> {
-                            Log.e(TAG, "蓝牙已断开");
+                            Logger.i("蓝牙已断开");
                             Toast.makeText(MainActivity.this, "蓝牙已断开", Toast.LENGTH_LONG).show();
                         },
                         throwable -> {
-                            throwable.printStackTrace();
+                            Logger.e("蓝牙已断开%s", throwable.getMessage());
                             Toast.makeText(MainActivity.this, "蓝牙断开失败", Toast.LENGTH_LONG).show();
                         });
     }

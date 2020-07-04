@@ -27,7 +27,6 @@ import butterknife.ButterKnife;
  * @since : 2019/10/25 0025
  */
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
-    private final String TAG = Adapter.class.getName();
     private final List<SearchResult> m_searchResults = new ArrayList<>();
     private OnItemClickListener m_onItemClickListener;
     private OnItemLongClickListener m_onItemLongClickListener;

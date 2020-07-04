@@ -1,20 +1,18 @@
 package com.jack.rx.websocket;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
-import org.java_websocket.WebSocket;
+import com.orhanobut.logger.Logger;
+
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.enums.ReadyState;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.ConnectException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +28,6 @@ import io.reactivex.subjects.PublishSubject;
  * @since : 2019/11/6
  */
 public final class RxWebSocketClient {
-    private final static String TAG = RxWebSocketClient.class.getName();
     private final static int MAX_RECONNECT = 3;
     private final PublishSubject<ReadyState> m_reConnectSubject = PublishSubject.create();
     private final PublishSubject<String> m_messageSubject = PublishSubject.create();
@@ -104,8 +101,8 @@ public final class RxWebSocketClient {
                                         m_webSocketClient = null;
                                         m_reConnectSubject.onNext(ReadyState.CLOSED);
                                     }))
-                            .subscribe(pair1 -> Log.i(TAG, String.format("reconnect ok : %s", pair1.toString())),
-                                    throwable -> Log.e(TAG, String.format("reconnect failed : %s", throwable.getMessage())));
+                            .subscribe(pair1 -> Logger.i("reconnect ok : %s", pair1.toString()),
+                                    throwable -> Logger.e("reconnect failed : %s", throwable.getMessage()));
                 }
                 return true;
             });
