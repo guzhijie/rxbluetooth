@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">rx_bluetooth</string>
     <string name="search_ble">搜索设备</string>
+    <string name="device_searching">正在搜索设备&#8230;</string>
+    <string name="device_connecting">正在连接设备%1$s&#8230;</string>
+    <string name="device_disconnecting">正在断开设备%1$s&#8230;</string>
+    <string name="device_info">设备信息</string>
+    <string name="waiting">请稍等&#8230;</string>
 </resources>

@@ -1,7 +1,7 @@
-package com.jack.test.js100;
+package com.jack.test.sensor.js100;
 
-import static com.jack.test.BluetoothConstants.JS100_COMMAND_XOR_BEGIN_INDEX;
-import static com.jack.test.BluetoothConstants.JS100_COMMAND_XOR_END_INDEX;
+import static com.jack.test.sensor.BluetoothConstants.JS100_COMMAND_XOR_BEGIN_INDEX;
+import static com.jack.test.sensor.BluetoothConstants.JS100_COMMAND_XOR_END_INDEX;
 
 /**
  * 描述:

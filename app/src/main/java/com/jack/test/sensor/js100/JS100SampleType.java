@@ -1,4 +1,4 @@
-package com.jack.test.js100;
+package com.jack.test.sensor.js100;
 
 /**
  * 描述:

@@ -1,15 +1,14 @@
-package com.jack.test;
+package com.jack.test.sensor;
 
 import android.util.Log;
 
 import com.inuker.bluetooth.library.model.BleGattProfile;
-import com.jack.rx.bluetooth.BluetoothException;
 import com.jack.rx.bluetooth.BluetoothHolderFactory;
 import com.jack.rx.bluetooth.RxBluetooth;
-import com.jack.test.js100.JS100BluetoothHolder;
-import com.jack.test.zc1000.ZC1000BluetoothHolder;
+import com.jack.test.sensor.js100.JS100BluetoothHolder;
+import com.jack.test.sensor.unknow.UnKnowBluetoothHolder;
+import com.jack.test.sensor.zc1000.ZC1000BluetoothHolder;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
 /**
@@ -29,12 +28,12 @@ public final class SensorBluetoothHolderFactory implements BluetoothHolderFactor
                 String name = new String(bytes).trim();
                 //noinspection MalformedFormatString
                 Log.e(TAG, String.format("当前蓝牙设备制造商名字", name));
-                return new JS100BluetoothHolder(mac);
+                return new JS100BluetoothHolder(mac, bleGattProfile);
             });
         } else if (bleGattProfile.containsCharacter(UUID_FFE0, UUID_FFE4)) {
-            return Single.just(new ZC1000BluetoothHolder(mac));
+            return Single.just(new ZC1000BluetoothHolder(mac, bleGattProfile));
         } else {
-            return Single.error(new BluetoothException(String.format("mac :%s ", mac)));
+            return Single.just(new UnKnowBluetoothHolder(mac, bleGattProfile));
         }
     }
 

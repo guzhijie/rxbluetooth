@@ -1,16 +1,17 @@
 package com.jack.test;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.inuker.bluetooth.library.search.SearchResult;
+import com.inuker.bluetooth.library.utils.StringUtils;
 import com.jack.bluetooth.R;
 
 import java.util.ArrayList;
@@ -38,15 +39,17 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         return new ViewHolder(itemView);
     }
 
-    @SuppressLint("DefaultLocale")
+    @SuppressLint({"DefaultLocale", "ResourceAsColor"})
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        TextView textView = viewHolder.item;
         SearchResult searchResult = m_searchResults.get(i);
         String addr = searchResult.device.getAddress();
         String name = searchResult.device.getName();
         int rssi = searchResult.rssi;
-        textView.setText(String.format("地址:%s, 名字:%s, 强度:%d", addr, name, rssi));
+        viewHolder.m_Name.setText(StringUtils.isBlank(name) ? "未知" : name);
+        viewHolder.m_Address.setText(addr);
+        viewHolder.m_Signal.setText(String.valueOf(rssi));
+        viewHolder.m_Item.setBackgroundResource(i % 2 == 0 ? R.color.lightsteelblue : R.color.skyblue);
     }
 
     @Override
@@ -69,6 +72,11 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         return this;
     }
 
+    public void removeAllItem() {
+        this.m_searchResults.clear();
+        notifyDataSetChanged();
+    }
+
     interface OnItemClickListener {
         void OnItemClick(View view, int pos, Object o);
     }
@@ -79,24 +87,30 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.name)
+        TextView m_Name;
+        @BindView(R.id.address)
+        TextView m_Address;
+        @BindView(R.id.signal)
+        TextView m_Signal;
         @BindView(R.id.item)
-        TextView item;
+        LinearLayout m_Item;
         private Adapter m_adapter;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             m_adapter = Adapter.this;
-            item.setOnClickListener(v -> {
+            m_Item.setOnClickListener(v -> {
                 if (m_adapter.m_onItemClickListener != null) {
                     int pos = getAdapterPosition();
                     m_adapter.m_onItemClickListener.OnItemClick(v, pos, m_adapter.m_searchResults.get(pos));
                 }
             });
-            item.setOnLongClickListener(v -> {
+            m_Item.setOnLongClickListener(v -> {
                 if (m_adapter.m_onItemLongClickListener != null) {
                     int pos = getAdapterPosition();
-                    return m_adapter.m_onItemLongClickListener.OnItemLongClick(item, pos, m_adapter.m_searchResults.get(pos));
+                    return m_adapter.m_onItemLongClickListener.OnItemLongClick(v, pos, m_adapter.m_searchResults.get(pos));
                 }
                 return true;
             });

@@ -1,4 +1,4 @@
-package com.jack.test;
+package com.jack.test.sensor;
 
 import java.util.UUID;
 

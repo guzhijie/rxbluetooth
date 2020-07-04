@@ -1,17 +1,18 @@
-package com.jack.test.zc1000;
+package com.jack.test.sensor.zc1000;
 
+import com.inuker.bluetooth.library.model.BleGattProfile;
 import com.jack.rx.bluetooth.RxBluetooth;
-import com.jack.test.SensorBluetoothHolder;
+import com.jack.test.sensor.SensorBluetoothHolder;
 
 import java.util.UUID;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 
-import static com.jack.test.BluetoothConstants.BATTERY_LEVEL_UUID;
-import static com.jack.test.BluetoothConstants.BATTERY_SERVICE_UUID;
-import static com.jack.test.BluetoothConstants.UUID_FFE0;
-import static com.jack.test.BluetoothConstants.UUID_FFE4;
+import static com.jack.test.sensor.BluetoothConstants.BATTERY_LEVEL_UUID;
+import static com.jack.test.sensor.BluetoothConstants.BATTERY_SERVICE_UUID;
+import static com.jack.test.sensor.BluetoothConstants.UUID_FFE0;
+import static com.jack.test.sensor.BluetoothConstants.UUID_FFE4;
 
 /**
  * 描述:
@@ -20,8 +21,8 @@ import static com.jack.test.BluetoothConstants.UUID_FFE4;
  * @since : 2019/8/13
  */
 public final class ZC1000BluetoothHolder extends SensorBluetoothHolder<ZC1000SensorData, Void> {
-    public ZC1000BluetoothHolder(final String mac) {
-        super(mac, RxBluetooth.getInstance());
+    public ZC1000BluetoothHolder(final String mac, BleGattProfile bleGattProfile) {
+        super(mac, RxBluetooth.getInstance(), bleGattProfile);
     }
 
     @Override

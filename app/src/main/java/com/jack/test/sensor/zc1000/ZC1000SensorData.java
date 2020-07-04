@@ -1,6 +1,6 @@
-package com.jack.test.zc1000;
+package com.jack.test.sensor.zc1000;
 
-import com.jack.test.SensorData;
+import com.jack.test.sensor.SensorData;
 
 /**
  * 描述:

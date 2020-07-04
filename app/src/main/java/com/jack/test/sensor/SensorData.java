@@ -1,7 +1,4 @@
-package com.jack.test;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+package com.jack.test.sensor;
 
 /**
  * 描述:

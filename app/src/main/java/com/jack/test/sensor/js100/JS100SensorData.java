@@ -1,9 +1,9 @@
-package com.jack.test.js100;
+package com.jack.test.sensor.js100;
 
 import android.util.Pair;
 
 import com.jack.rx.bluetooth.RxBluetooth;
-import com.jack.test.SensorData;
+import com.jack.test.sensor.SensorData;
 
 import java.util.concurrent.TimeUnit;
 
@@ -12,9 +12,9 @@ import io.reactivex.Observer;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
-import static com.jack.test.BluetoothConstants.UUID_FFF0;
-import static com.jack.test.BluetoothConstants.UUID_FFF3;
-import static com.jack.test.BluetoothConstants.WRITE_DATA_MAX_LEN;
+import static com.jack.test.sensor.BluetoothConstants.UUID_FFF0;
+import static com.jack.test.sensor.BluetoothConstants.UUID_FFF3;
+import static com.jack.test.sensor.BluetoothConstants.WRITE_DATA_MAX_LEN;
 
 /**
  * 描述:

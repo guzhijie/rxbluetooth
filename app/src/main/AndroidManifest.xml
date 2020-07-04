@@ -18,6 +18,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.jack.test.DeviceInfoActivity" />
         <service android:name="com.inuker.bluetooth.library.BluetoothService" />
     </application>
     <uses-feature
