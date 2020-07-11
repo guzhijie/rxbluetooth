@@ -9,6 +9,7 @@ import java.util.UUID;
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
+import io.reactivex.SingleTransformer;
 
 import static com.jack.test.sensor.BluetoothConstants.UUID_180A;
 
@@ -18,10 +19,11 @@ import static com.jack.test.sensor.BluetoothConstants.UUID_180A;
  * @author :jack.gu
  * @since : 2020/7/2
  */
-public class UnKnowBluetoothHolder extends SensorBluetoothHolder<UnKnowSensorData,Void> {
+public class UnKnowBluetoothHolder extends SensorBluetoothHolder<UnKnowSensorData, Void> {
     public UnKnowBluetoothHolder(String mac, BleGattProfile bleGattProfile) {
         super(mac, RxBluetooth.getInstance(), bleGattProfile);
     }
+
 
     @Override
     public Observable<UnKnowSensorData> sensorObservable(Void param) {
@@ -39,13 +41,7 @@ public class UnKnowBluetoothHolder extends SensorBluetoothHolder<UnKnowSensorDat
     }
 
     @Override
-    public <T> ObservableTransformer<byte[], T> readTransformer(UUID serviceUUID, UUID characterUUID) {
+    protected <T> SingleTransformer<byte[], T> readTransformer(UUID serviceUUID, UUID characterUUID) {
         return null;
-    }
-
-    @Override
-    public Single<String> deviceInfo() {
-        return m_rxBluetooth.read(m_mac, UUID_180A, UUID.fromString("00002a28-0000-1000-8000-00805f9b34fb"))
-                .map(String::new);
     }
 }

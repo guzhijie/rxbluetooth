@@ -21,6 +21,7 @@ import com.jack.rx.bluetooth.RxBluetooth;
 import com.jack.test.sensor.SensorBluetoothHolder;
 import com.jack.test.sensor.SensorBluetoothHolderFactory;
 import com.jack.test.sensor.SensorData;
+import com.jack.test.sensor.zc1000.ZC1000BluetoothHolder;
 import com.orhanobut.logger.Logger;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.trello.rxlifecycle3.components.support.RxAppCompatActivity;

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
+import io.reactivex.SingleTransformer;
 
 import static com.jack.test.sensor.BluetoothConstants.BATTERY_LEVEL_UUID;
 import static com.jack.test.sensor.BluetoothConstants.BATTERY_SERVICE_UUID;
@@ -33,7 +34,7 @@ public final class ZC1000BluetoothHolder extends SensorBluetoothHolder<ZC1000Sen
     }
 
     @Override
-    public <T> ObservableTransformer<byte[], T> notifyTransformer(UUID serviceUUID, UUID characterUUID) {
+    protected <T> ObservableTransformer<byte[], T> notifyTransformer(UUID serviceUUID, UUID characterUUID) {
         // UUID_FFE0, UUID_FFE4
         if (UUID_FFE0.equals(serviceUUID) && UUID_FFE4.equals(characterUUID)) {
             //noinspection unchecked
@@ -44,7 +45,7 @@ public final class ZC1000BluetoothHolder extends SensorBluetoothHolder<ZC1000Sen
     }
 
     @Override
-    public <T> ObservableTransformer<byte[], T> readTransformer(UUID serviceUUID, UUID characterUUID) {
+    protected <T> SingleTransformer<byte[], T> readTransformer(UUID serviceUUID, UUID characterUUID) {
         return upstream -> upstream.map(bytes -> (T) bytes);
     }
 

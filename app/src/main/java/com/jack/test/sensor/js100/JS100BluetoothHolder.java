@@ -11,6 +11,7 @@ import java.util.UUID;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;
 import io.reactivex.ObservableTransformer;
+import io.reactivex.SingleTransformer;
 
 import static com.jack.test.sensor.BluetoothConstants.BATTERY_SERVICE_UUID;
 import static com.jack.test.sensor.BluetoothConstants.READ_DATA_MIN_LEN;
@@ -27,7 +28,7 @@ import static com.jack.test.sensor.BluetoothConstants.UUID_FFF2;
  */
 public final class JS100BluetoothHolder extends SensorBluetoothHolder<JS100SensorData, JS100Param> {
     public JS100BluetoothHolder(final String mac, BleGattProfile bleGattProfile) {
-        super(mac, RxBluetooth.getInstance(),bleGattProfile);
+        super(mac, RxBluetooth.getInstance(), bleGattProfile);
     }
 
     @Override
@@ -38,7 +39,7 @@ public final class JS100BluetoothHolder extends SensorBluetoothHolder<JS100Senso
     }
 
     @Override
-    public <T> ObservableTransformer<byte[], T> notifyTransformer(UUID serviceUUID, UUID characterUUID) {
+    protected <T> ObservableTransformer<byte[], T> notifyTransformer(UUID serviceUUID, UUID characterUUID) {
         //UUID_FFF0, UUID_FFF1
         if (UUID_FFF0.equals(serviceUUID) && UUID_FFF2.equals(characterUUID)) {
             //noinspection unchecked
@@ -49,7 +50,7 @@ public final class JS100BluetoothHolder extends SensorBluetoothHolder<JS100Senso
     }
 
     @Override
-    public <T> ObservableTransformer<byte[], T> readTransformer(UUID serviceUUID, UUID characterUUID) {
+    protected <T> SingleTransformer<byte[], T> readTransformer(UUID serviceUUID, UUID characterUUID) {
         //UUID_FFF0, UUID_FFF1
         if (UUID_FFF0.equals(serviceUUID) && UUID_FFF1.equals(characterUUID)) {
             return upstream -> upstream.map(data -> {
