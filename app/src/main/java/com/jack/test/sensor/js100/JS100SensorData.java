@@ -4,7 +4,9 @@ import android.util.Pair;
 
 import com.jack.rx.bluetooth.RxBluetooth;
 import com.jack.test.sensor.SensorData;
+import com.orhanobut.logger.Logger;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.ObservableOperator;
@@ -150,12 +152,14 @@ public class JS100SensorData extends SensorData<JS100SensorData, Float, Float, F
                         }
                         Pair<Integer, byte[]> pair = getLostDataPackageCountAndIndexArray();
                         if (0 != pair.first) {
+                            /*1,如果有丢包现象，那么重新请求那些丢失的数据包*/
                             Single.timer(200, TimeUnit.MICROSECONDS)
                                     .flatMap(aLong -> RxBluetooth.getInstance()
                                             .write(m_js100BluetoothHolder.getMac(), UUID_FFF0, UUID_FFF3, pair.second))
                                     .onErrorReturn(throwable -> false)
                                     .subscribe();
                         } else if (m_maxIndex == m_recvFlag.length - 1) {
+                            /* 2,如果接受的数据包已经是最后一个包，那么处理相关数据，并返回给观察者*/
                             m_js100SensorData.data = new short[m_buffer.length / 2];
                             for (int i = 0; i < m_js100SensorData.data.length; ++i) {
                                 m_js100SensorData.data[i] = (short) (m_buffer[i * 2] & 0xFF | m_buffer[i * 2 + 1] << 8 & 0xFF00);
@@ -163,6 +167,14 @@ public class JS100SensorData extends SensorData<JS100SensorData, Float, Float, F
                             m_js100SensorData.calcCachedRelateValue();
                             observer.onNext(m_js100SensorData);
                             reset();
+                        } else {
+                            Logger.i(String.format("接收到了第[%d]个的数据包 内容[%s]", index, Arrays.toString(value)));
+                        }
+                    } else {
+                        if (m_firstPackageReceived) {
+                            Logger.e(String.format("数据包接受还没有开始，但是已经接收到了第[%d]个的数据包", index));
+                        } else {
+                            Logger.e(String.format("数据包接受已经开始，但是已经接收到了第一个[%d]数据包", index));
                         }
                     }
                 }
@@ -217,19 +229,12 @@ public class JS100SensorData extends SensorData<JS100SensorData, Float, Float, F
                  * @return
                  */
                 private int firstDataPackage(byte[] value) {
-                    int temp = (value[1] << 8 & 0xFF00)
-                            | (value[2] & 0xFF);
+                    int temp = (value[1] << 8 & 0xFF00) | (value[2] & 0xFF);
                     int sampleType = value[3] & 0xFF;
-                    int bandwidth = (value[4] << 8 & 0xFF00)
-                            | (value[5] & 0xFF);
-                    int samplePoints = (value[6] << 8 & 0xFF00)
-                            | (value[7] & 0xFF);
-                    int totalPackages = samplePoints * 2 / (WRITE_DATA_MAX_LEN - 1)
-                            + (0 == (samplePoints * 2) % (WRITE_DATA_MAX_LEN - 1) ? 0 : 1);
-                    int factor = (value[12] << 24 & 0xFF000000)
-                            | (value[11] << 16 & 0xFF0000)
-                            | (value[10] << 8 & 0xFF00)
-                            | (value[9] & 0xFF);
+                    int bandwidth = (value[4] << 8 & 0xFF00) | (value[5] & 0xFF);
+                    int samplePoints = (value[6] << 8 & 0xFF00) | (value[7] & 0xFF);
+                    int totalPackages = samplePoints * 2 / (WRITE_DATA_MAX_LEN - 1) + (0 == (samplePoints * 2) % (WRITE_DATA_MAX_LEN - 1) ? 0 : 1);
+                    int factor = (value[12] << 24 & 0xFF000000) | (value[11] << 16 & 0xFF0000) | (value[10] << 8 & 0xFF00) | (value[9] & 0xFF);
                     m_js100SensorData.temp = temp / 100.0f;
                     m_js100SensorData.sampleType = sampleType;
                     m_js100SensorData.bandwidth = bandwidth;
