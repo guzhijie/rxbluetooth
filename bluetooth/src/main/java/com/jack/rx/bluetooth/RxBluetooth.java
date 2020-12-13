@@ -28,14 +28,14 @@ import io.reactivex.subjects.PublishSubject;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public final class RxBluetooth extends BaseRxBluetooth {
     private static RxBluetooth m_rxBluetooth;
-    private final PublishSubject<Pair<String, BluetoothStatus>> m_bluetoothStatusBus = PublishSubject.create();
+    private final PublishSubject<BluetoothStatusInfo> m_bluetoothStatusBus = PublishSubject.create();
     private final PublishSubject<String> m_stopReconnect = PublishSubject.create();
     private final Map<String, BluetoothHolder> m_bluetoothMap = new ConcurrentHashMap<>(8);
     private final BleConnectStatusListener m_connectStatusListener = new BleConnectStatusListener() {
         @Override
         public void onConnectStatusChanged(final String mac, final int status) {
             final BluetoothStatus bluetoothStatus = BluetoothStatus.valueOf(status);
-            m_bluetoothStatusBus.onNext(Pair.create(mac, bluetoothStatus));
+            m_bluetoothStatusBus.onNext(new BluetoothStatusInfo(mac, bluetoothStatus));
             if (BluetoothStatus.CONNECTED != bluetoothStatus) {
                 autoConnect(mac, new BleConnectOptions.Builder()
                                 .setConnectRetry(3)               // 连接如果失败重试3次
@@ -51,14 +51,14 @@ public final class RxBluetooth extends BaseRxBluetooth {
         private void autoConnect(String mac, BleConnectOptions options, BluetoothHolder holder) {
             connectByMac(mac, options, (mac1, bleGattProfile) -> Single.just(holder))
                     .takeUntil(m_stopReconnect.filter(s -> s.equals(mac)).take(1).singleOrError())
-                    .doOnSubscribe(disposable -> m_bluetoothStatusBus.onNext(Pair.create(mac, BluetoothStatus.CONNECTING)))
+                    .doOnSubscribe(disposable -> m_bluetoothStatusBus.onNext(new BluetoothStatusInfo(mac, BluetoothStatus.CONNECTING)))
                     .retry(3)
                     .doFinally(() -> m_client.unregisterConnectStatusListener(mac, m_connectStatusListener))
                     .subscribe(bluetoothHolder -> {
                             },
                             throwable -> {
                                 m_bluetoothMap.remove(mac);
-                                m_bluetoothStatusBus.onNext(Pair.create(mac, BluetoothStatus.DISCONNECTED));
+                                m_bluetoothStatusBus.onNext(new BluetoothStatusInfo(mac, BluetoothStatus.DISCONNECTED));
                             });
         }
     };
@@ -84,12 +84,13 @@ public final class RxBluetooth extends BaseRxBluetooth {
 
     /**
      * 获取蓝牙设备电量，信号强度
+     *
      * @return
      */
     public Observable<BluetoothInfo> bluetoothStatusObservable() {
         return Observable.fromIterable(getConnectedBluetoothStatus())
-                .concatMap(bluetoothHolder -> m_bluetoothStatusBus.filter(pair -> pair.first.equals(bluetoothHolder.getMac()))
-                        .map(statusPair -> statusPair.second)
+                .concatMap(bluetoothHolder -> m_bluetoothStatusBus.filter(bluetoothStatusInfo -> bluetoothStatusInfo.mac.equals(bluetoothHolder.getMac()))
+                        .map(bluetoothStatusInfo -> bluetoothStatusInfo.status)
                         .startWith(getConnectStatus(bluetoothHolder.getMac()))
                         .join(bluetoothHolder.readPower(),
                                 bluetoothStatus -> Observable.empty(),
@@ -144,9 +145,9 @@ public final class RxBluetooth extends BaseRxBluetooth {
      * @return
      */
     private Single<BluetoothStatus> bluetoothStatusObservable(String mac) {
-        return m_bluetoothStatusBus.filter(pair -> pair.first.equals(mac) && pair.second == BluetoothStatus.CONNECTED)
+        return m_bluetoothStatusBus.filter(bluetoothStatusInfo -> bluetoothStatusInfo.mac.equals(mac) && bluetoothStatusInfo.status == BluetoothStatus.CONNECTED)
                 .takeLast(1, 12, TimeUnit.SECONDS)
-                .map(stringBluetoothStatusPair -> stringBluetoothStatusPair.second)
+                .map(bluetoothStatusInfo -> bluetoothStatusInfo.status)
                 .mergeWith(Observable.timer(6, TimeUnit.SECONDS)
                         .map(aLong -> getConnectStatus(mac))
                         .filter(bluetoothStatus -> bluetoothStatus == BluetoothStatus.CONNECTED))
@@ -157,7 +158,7 @@ public final class RxBluetooth extends BaseRxBluetooth {
         return connect0(mac, options)
                 .flatMap(profilePair -> factory.create(mac, profilePair.second).map(bluetoothHolder -> {
                     m_bluetoothMap.put(mac, bluetoothHolder);
-                    m_bluetoothStatusBus.onNext(Pair.create(mac, BluetoothStatus.CONNECTED));
+                    m_bluetoothStatusBus.onNext(new BluetoothStatusInfo(mac, BluetoothStatus.CONNECTED));
                     m_client.registerConnectStatusListener(mac, m_connectStatusListener);
                     return bluetoothHolder;
                 }));
